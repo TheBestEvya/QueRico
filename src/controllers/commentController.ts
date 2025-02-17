@@ -45,7 +45,7 @@ interface GetCommentsRequest extends Request {
     try {
       const { text } = req.body;
       const { postId } = req.params;
-      const userId = req.user.id;
+      const userId = req.body.user.id;
 
       // בדיקה שהפוסט קיים
       const post = await Post.findById(postId);
@@ -105,7 +105,7 @@ interface GetCommentsRequest extends Request {
     try {
       const { commentId } = req.params;
       const { text } = req.body;
-      const userId = req.user.id;
+      const userId = req.body.user.id;
 
       const comment = await Comment.findOne({
         _id: commentId,
@@ -131,7 +131,7 @@ interface GetCommentsRequest extends Request {
   const deleteComment = async (req: Request<{ commentId: string }>, res: Response):Promise<any> => {
     try {
       const { commentId } = req.params;
-      const userId = req.user.id;
+      const userId = req.body.user.id;
 
       const comment = await Comment.findOne({
         _id: commentId,
