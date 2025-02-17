@@ -10,7 +10,7 @@ export interface IComment extends Document {
   updatedAt: Date;
 }
 
-const commentSchema = new Schema<IComment>({
+export const commentSchema = new Schema<IComment>({
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',

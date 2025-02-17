@@ -1,13 +1,13 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { IUser } from './userModel';
-import { IComment } from './commentModel';
+import { IComment, commentSchema } from './commentModel';
 
 export interface IPost extends Document {
   author: IUser['_id'];
   text: string;
   image?: string;
   likes: IUser['_id'][];
-  commentsCount: number;  // שדה חדש לספירת תגובות
+  comments: IComment[]; 
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,7 +21,6 @@ const postSchema = new Schema<IPost>({
   text: {
     type: String,
     required: true,
-    trim: true
   },
   image: {
     type: String
@@ -30,10 +29,7 @@ const postSchema = new Schema<IPost>({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }],
-  commentsCount: {
-    type: Number,
-    default: 0
-  }
+  comments: [commentSchema]
 }, {
   timestamps: true
 });
@@ -42,11 +38,6 @@ const postSchema = new Schema<IPost>({
 postSchema.index({ author: 1, createdAt: -1 });
 postSchema.index({ createdAt: -1 });  // אינדקס לדף הראשי
 
-// Virtual populate - מאפשר לנו לקבל את התגובות כשנרצה
-postSchema.virtual('comments', {
-  ref: 'Comment',
-  localField: '_id',
-  foreignField: 'post'
-});
+
 
 export const Post = mongoose.model<IPost>('Post', postSchema);
