@@ -39,7 +39,7 @@ interface ChangePasswordRequest extends Request {
   body: {
     currentPassword: string;
     newPassword: string;
-    userID: string; 
+    userId: string; 
    };
   
 }
@@ -49,7 +49,14 @@ interface ForgotPasswordRequest extends Request {
     email: string;
   };
 }
-
+    const secret = process.env.JWT_SECRET ?? 'default';
+    const expiresIn = process.env.JWT_EXPIRES_IN?? '1h';
+    if (!secret) {
+      throw new Error('Missing JWT_SECRET environment variable');
+    }
+    if (!expiresIn) {
+      throw new Error('Missing JWT_EXPIRES_IN environment variable');
+    }
 
   // רישום משתמש חדש
   const register=async  (req: RegisterRequest, res: Response):Promise<any>=> {
@@ -222,8 +229,7 @@ interface ForgotPasswordRequest extends Request {
   // שינוי סיסמה
   const changePassword = async(req: ChangePasswordRequest, res: Response):Promise<any> =>{
     try {
-      const { currentPassword, newPassword } = req.body;
-      const userId = req.user.id;
+      const { currentPassword, newPassword, userId } = req.body;
 
       const user = await User.findById(userId);
       if (!user) {
@@ -273,18 +279,23 @@ interface ForgotPasswordRequest extends Request {
 
   // Private methods
   const generateAccessToken = (userId: string): string =>{
+    const secret = process.env.JWT_SECRET ?? 'default';
+    const expiresIn = process.env.JWT_EXPIRES_IN?? '1h';
+    
+
+
     return jwt.sign(
       { userId }, 
-      process.env.JWT_SECRET || 'your-secret-key', 
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+      secret , 
+      { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
     );
   }
 
   const  generateRefreshToken = (userId: string): string =>{
     return jwt.sign(
       { userId }, 
-      process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key', 
-      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+      secret, 
+      { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
     );
   }
 

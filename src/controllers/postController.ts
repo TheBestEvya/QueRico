@@ -14,7 +14,6 @@ interface CreatePostRequest extends Request {
   };
  
 }
-
 interface UpdatePostRequest extends Request {
   params: {
     postId: string;
@@ -28,7 +27,6 @@ interface UpdatePostRequest extends Request {
   };
  
 }
-
 interface GetPostsRequest extends Request {
   query: {
     page?: string;
@@ -42,14 +40,14 @@ interface GetPostsRequest extends Request {
    const createPost= async (req: CreatePostRequest, res: Response):Promise<any> => {
     try {
       const { text } = req.body;
-      const userId = req.user.id;
+      const userId = req.body.user.id;
 
       const post = await Post.create({
         author: userId,
         text,
         image: req.file?.filename
       });
-
+      // fetch the data of the author - only username and profileImage
       await post.populate('author', 'username profileImage');
 
      return res.status(201).json(post);
@@ -122,7 +120,7 @@ interface GetPostsRequest extends Request {
     try {
       const { postId } = req.params;
       const { text } = req.body;
-      const userId = req.user.id;
+      const userId = req.body.user.id;
 
       const post = await Post.findOne({ _id: postId, author: userId });
       
@@ -151,7 +149,7 @@ interface GetPostsRequest extends Request {
   const deletePost=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-      const userId = req.user.id;
+      const userId = req.body.user.id;
 
       const post = await Post.findOne({ _id: postId, author: userId });
       
@@ -174,7 +172,7 @@ interface GetPostsRequest extends Request {
   const toggleLike=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-      const userId = req.user.id;
+      const {userId} = req.body.user.id;
 
       const post = await Post.findById(postId);
       if (!post) {
