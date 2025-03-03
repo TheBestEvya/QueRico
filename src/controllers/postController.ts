@@ -57,7 +57,7 @@ interface GetPostsRequest extends Request {
   }
 
   // קבלת כל הפוסטים עם paging
-  const getPosts = async(req: GetPostsRequest, res: Response)=> {
+  const getAllPosts = async(req: GetPostsRequest, res: Response)=> {
     try {
       const page = parseInt(req.query.page || '1');
       const limit = parseInt(req.query.limit || '10');
@@ -200,6 +200,37 @@ interface GetPostsRequest extends Request {
     }
   }
 
+  const getPostsByUser = async (req: Request<{ userId: string }>, res: Response): Promise<void> => {
+    const { userId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;  // Default to page 1
+    const limit = parseInt(req.query.limit as string) || 10; // Default to 10 posts
+  
+    try {  
+      // Get paginated posts and total count
+      const posts = await Post.find({ author: userId })
+        .skip((page - 1) * limit) // Skip previous pages
+        .limit(limit) // Limit results per page
+        .sort({ createdAt: -1 }); // Optional: Sort by newest
+  
+      const totalPosts = await Post.countDocuments({ author: userId });
+  
+      if (posts.length === 0) {
+        res.status(404).json({ message: 'No posts found for this user' });
+        return;
+      }
+  
+      // Send paginated response
+      res.status(200).json({
+        posts,
+        currentPage: page,
+        totalPages: Math.ceil(totalPosts / limit),
+        totalPosts,
+      });
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+      res.status(500).json({ message: 'Error fetching posts' });
+    }
+  };
   // קבלת הלייקים של פוסט
   const getPostLikes=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
     try {
@@ -219,4 +250,4 @@ interface GetPostsRequest extends Request {
   }
 
 
-export default { createPost, getPosts, getPostById, updatePost, deletePost, toggleLike, getPostLikes };
+export default { createPost,getPostsByUser, getAllPosts, getPostById, updatePost, deletePost, toggleLike, getPostLikes };
