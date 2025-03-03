@@ -101,6 +101,23 @@ router.post('/register', authController.register);
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     LoginUser:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           description: User's email address
+ *           example: user@example.com
+ *         password:
+ *           type: string
+ *           description: User's password
+ *           example: password123
+ * 
  * /auth/login:
  *   post:
  *     summary: Logs in a user
@@ -111,7 +128,7 @@ router.post('/register', authController.register);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             $ref: '#/components/schemas/LoginUser'
  *     responses:
  *       200:
  *         description: Successful login
@@ -132,6 +149,7 @@ router.post('/register', authController.register);
  *       400:
  *         description: Invalid credentials or request
  */
+
 router.post('/login', authController.login);
 
 /**

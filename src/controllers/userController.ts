@@ -2,9 +2,12 @@ import { Request, Response } from 'express';
 import { User } from '../models/userModel';
 import { Post } from '../models/postModel';
 
-const getProfile = async (req: Request, res: Response) => {
+interface userRequest extends Request {
+  userId: string;
+}
+const getProfile = async (req: userRequest, res: Response) => {
   try {
-    const userId = req.user.id; // מגיע ממידלוור האוטנטיקציה
+    const userId = req.userId; // מגיע ממידלוור האוטנטיקציה
     const user = await User.findById(userId).select('-password -refreshToken');
     
     if (!user) {
@@ -32,9 +35,9 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-const updateProfile = async (req: Request, res: Response) => {
+const updateProfile = async (req: userRequest, res: Response) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { name, email } = req.body;
     
     // בדיקה האם השם משתמש או האימייל כבר קיימים
@@ -105,9 +108,9 @@ const getUserPosts = async (req: Request, res: Response) => {
   }
 };
 
-const deleteProfile = async (req: Request, res: Response) => {
+const deleteProfile = async (req: userRequest, res: Response) => {
   try {
-    const userId = req.user.id; // Get the authenticated user's ID
+    const userId = req.userId; // Get the authenticated user's ID
 
     // First, check if the user exists
     const user = await User.findById(userId);
