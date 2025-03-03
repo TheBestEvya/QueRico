@@ -25,8 +25,8 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
-    "start": "ts-node app.ts",
-    "dev": "nodemon --exec ts-node app.ts",
+    "start": "ts-node src/app.ts",
+    "dev": "nodemon --exec ts-node src/app.ts",
     "test": "jest --detectOpenHandles --coverage --forceExit"
   }
 }
