@@ -6,7 +6,7 @@ import { uploadImage } from '../middleware/uploads';
 const router = express.Router();
 
 // Public routes
-router.get('/', postController.getPosts);
+router.get('/', postController.getAllPosts);
 router.get('/:postId', postController.getPostById);
 router.get('/:postId/likes', postController.getPostLikes);
 
