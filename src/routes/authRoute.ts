@@ -3,8 +3,14 @@ import authController from '../controllers/authController';
 import { authenticateJwt } from '../middleware/auth';
 
 const router = express.Router();
-
 // Public routes
+/**
+ * @swagger
+ * tags:
+ *  name: Auth
+ * description: User authentication
+ * 
+ */
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/google', authController.googleAuth);
