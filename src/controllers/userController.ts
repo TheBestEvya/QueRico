@@ -3,9 +3,9 @@ import { User } from '../models/userModel';
 import { Post } from '../models/postModel';
 
 interface userRequest extends Request {
-  userId: string;
+  userId?: string;
 }
-const getProfile = async (req: userRequest, res: Response) => {
+const getProfile = async (req: userRequest, res: Response):Promise<any> => {
   try {
     const userId = req.userId; // מגיע ממידלוור האוטנטיקציה
     const user = await User.findById(userId).select('-password -refreshToken');
@@ -14,13 +14,13 @@ const getProfile = async (req: userRequest, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    return res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching profile', error });
   }
 };
 
-const getUserById = async (req: Request, res: Response) => {
+const getUserById = async (req: Request, res: Response):Promise<any> => {
   try {
     const { userId } = req.params;
     const user = await User.findById(userId).select('-password -refreshToken');
@@ -35,7 +35,7 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-const updateProfile = async (req: userRequest, res: Response) => {
+const updateProfile = async (req: userRequest, res: Response):Promise<any> => {
   try {
     const userId = req.userId;
     const { name, email } = req.body;
@@ -77,7 +77,7 @@ const updateProfile = async (req: userRequest, res: Response) => {
   }
 };
 
-const getUserPosts = async (req: Request, res: Response) => {
+const getUserPosts = async (req: Request, res: Response):Promise<any> => {
   try {
     const { userId } = req.params;
     const { page = 1, limit = 10 } = req.query;
@@ -108,7 +108,7 @@ const getUserPosts = async (req: Request, res: Response) => {
   }
 };
 
-const deleteProfile = async (req: userRequest, res: Response) => {
+const deleteProfile = async (req: userRequest, res: Response):Promise<any> => {
   try {
     const userId = req.userId; // Get the authenticated user's ID
 
