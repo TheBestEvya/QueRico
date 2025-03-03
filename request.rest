@@ -1,0 +1,17 @@
+###
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "name" :"evyatararar",
+    "email": "evya1@gmail.com",
+    "password": "1234567"
+}
+
+###
+POST http://localhost:3000/auth/logout
+Content-Type: application/json
+
+{
+    "refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2M1OTM1MGQwN2NjZDcyYzQxYTIxNDQiLCJpYXQiOjE3NDEwMDI2ODksImV4cCI6MTc0MTAwNjI4OX0.OH1yrxObPHGXO7mrF677Oun_qgeuVdTmp7qntkU1K1c"
+}

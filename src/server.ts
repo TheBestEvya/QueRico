@@ -1,9 +1,9 @@
 import express, { Express } from "express";
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import authRoutes from './src/routes/authRoute';
-import postRoutes from './src/routes/postRoute';
-import commentRoutes from './src/routes/commentRoute';
+import authRoutes from './routes/authRoute';
+import postRoutes from './routes/postRoute';
+import commentRoutes from './routes/commentRoute';
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 

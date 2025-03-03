@@ -7,7 +7,7 @@ import { User, IUser } from '../models/userModel';
 // Interfaces
 interface RegisterRequest extends Request {
   body: {
-    username: string;
+    name: string;
     email: string;
     password: string;
   };
@@ -61,20 +61,20 @@ interface ForgotPasswordRequest extends Request {
   // רישום משתמש חדש
   const register=async  (req: RegisterRequest, res: Response):Promise<any>=> {
     try {
-      const { username, email, password } = req.body;
+      const { name, email, password } = req.body;
 
       const existingUser = await User.findOne({ 
-        $or: [{ email }, { username }] 
+        $or: [{ email }, { name }] 
       });
 
       if (existingUser) {
         return res.status(400).json({ 
-          message: 'Username or email already exists' 
+          message: 'email already exists' 
         });
       }
 
       const user = await User.create({
-        username,
+        name,
         email,
         password
       });
@@ -88,7 +88,7 @@ interface ForgotPasswordRequest extends Request {
       res.status(201).json({
         user: {
           id: userId,
-          username: user.username,
+          name: user.name,
           email: user.email,
           profileImage: user.profileImage
         },
@@ -124,7 +124,7 @@ interface ForgotPasswordRequest extends Request {
       res.json({
         user: {
           id: userId,
-          username: user.username,
+          name: user.name,
           email: user.email,
           profileImage: user.profileImage
         },
@@ -145,7 +145,7 @@ interface ForgotPasswordRequest extends Request {
 
       if (!user) {
         user = await User.create({
-          username: name,
+          name: name,
           email,
           googleId,
           profileImage: imageUrl
@@ -163,7 +163,7 @@ interface ForgotPasswordRequest extends Request {
       res.json({
         user: {
           id: userId,
-          username: user.username,
+          name: user.name,
           email: user.email,
           profileImage: user.profileImage
         },
@@ -251,31 +251,31 @@ interface ForgotPasswordRequest extends Request {
   }
 
   // שכחתי סיסמה
-  const  forgotPassword= async(req: ForgotPasswordRequest, res: Response):Promise<any>=> {
-    try {
-      const { email } = req.body;
+  // const  forgotPassword= async(req: ForgotPasswordRequest, res: Response):Promise<any>=> {
+  //   try {
+  //     const { email } = req.body;
 
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
+  //     const user = await User.findOne({ email });
+  //     if (!user) {
+  //       return res.status(404).json({ message: 'User not found' });
+  //     }
 
-      // יצירת טוקן לאיפוס סיסמה
-      const resetToken = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '1h' }
-      );
+  //     // יצירת טוקן לאיפוס סיסמה
+  //     const resetToken = jwt.sign(
+  //       { userId: user._id },
+  //       process.env.JWT_SECRET || 'your-secret-key',
+  //       { expiresIn: '1h' }
+  //     );
 
-      // בפרויקט אמיתי כאן היינו שולחים מייל עם הטוקן
-      res.json({ 
-        message: 'Password reset instructions sent to email',
-        resetToken // בפרויקט אמיתי לא נחזיר את הטוקן
-      });
-    } catch (error) {
-      res.status(500).json({ message: 'Error with forgot password', error });
-    }
-  }
+  //     // בפרויקט אמיתי כאן היינו שולחים מייל עם הטוקן
+  //     res.json({ 
+  //       message: 'Password reset instructions sent to email',
+  //       resetToken // בפרויקט אמיתי לא נחזיר את הטוקן
+  //     });
+  //   } catch (error) {
+  //     res.status(500).json({ message: 'Error with forgot password', error });
+  //   }
+  // }
 
   // Private methods
   const generateAccessToken = (userId: string): string =>{
@@ -290,7 +290,6 @@ interface ForgotPasswordRequest extends Request {
       { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
     );
   }
-
   const  generateRefreshToken = (userId: string): string =>{
     return jwt.sign(
       { userId }, 
@@ -298,6 +297,4 @@ interface ForgotPasswordRequest extends Request {
       { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
     );
   }
-
-
-export default {register,login,googleAuth,refreshToken,logout,changePassword,forgotPassword};
+export default {register,login,googleAuth,refreshToken,logout,changePassword,/**forgotPassword*/};

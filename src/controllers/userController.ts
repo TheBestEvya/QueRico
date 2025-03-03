@@ -35,19 +35,19 @@ const getUserById = async (req: Request, res: Response) => {
 const updateProfile = async (req: Request, res: Response) => {
   try {
     const userId = req.user.id;
-    const { username, email } = req.body;
+    const { name, email } = req.body;
     
     // בדיקה האם השם משתמש או האימייל כבר קיימים
     const existingUser = await User.findOne({
       $and: [
         { _id: { $ne: userId } },
-        { $or: [{ username }, { email }] }
+        { $or: [{ name }, { email }] }
       ]
     });
 
     if (existingUser) {
       return res.status(400).json({
-        message: 'Username or email already exists'
+        message: 'email already exists'
       });
     }
 
@@ -56,7 +56,7 @@ const updateProfile = async (req: Request, res: Response) => {
       userId,
       {
         $set: {
-          username,
+          name,
           email,
           ...(req.file && { profileImage: req.file.filename })
         }
@@ -83,13 +83,13 @@ const getUserPosts = async (req: Request, res: Response) => {
       .sort({ createdAt: -1 })
       .skip((Number(page) - 1) * Number(limit))
       .limit(Number(limit))
-      .populate('author', 'username profileImage')
+      .populate('author', 'name profileImage')
       .populate({
         path: 'comments',
         options: { limit: 3 },
         populate: {
           path: 'author',
-          select: 'username profileImage'
+          select: 'name profileImage'
         }
       });
 
