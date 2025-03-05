@@ -3,9 +3,11 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoute';
 import postRoutes from './routes/postRoute';
+import userRoutes from './routes/userRoute';
 import commentRoutes from './routes/commentRoute';
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
+import passport from './middleware/googleAuth'
 
 dotenv.config();
 
@@ -20,6 +22,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "*");
   next();
 });
+app.use(passport.initialize());
 // Static files for images
 app.use('/uploads', express.static('uploads'));
 // Routes
@@ -27,6 +30,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);
+app.use('/users', userRoutes)
 
 const options = {
   definition: {
@@ -36,7 +40,7 @@ const options = {
       version: "1.0.0",
       description: "REST server including authentication using JWT",
     },
-    servers: [{ url: "http://localhost:3000", },],
+    servers: [{ url: "http://localhost:3001", },],
   },
   apis: ["./src/routes/*.ts"],
 };

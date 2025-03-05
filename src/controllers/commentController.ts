@@ -142,11 +142,6 @@ interface GetCommentsRequest extends Request {
         return res.status(404).json({ message: 'Comment not found or unauthorized' });
       }
 
-      // עדכון מונה התגובות בפוסט
-      await Post.findByIdAndUpdate(comment.post, {
-        $inc: { commentsCount: -1 }
-      });
-
       await comment.deleteOne();
 
     return  res.json({ message: 'Comment deleted successfully' });
