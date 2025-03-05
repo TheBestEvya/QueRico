@@ -5,6 +5,27 @@ import { uploadImage } from '../middleware/uploads';
 
 const router = express.Router();
 
+
+/**
+ * @swagger
+ * tags:
+ *  name: Post
+ * description: User endpoints
+ * 
+ */
+
+/**
+* @swagger
+* components:
+*   securitySchemes:
+*     bearerAuth:
+*       type: http
+*       scheme: bearer
+*       bearerFormat: JWT
+*/
+
+
+
 // Public routes
 router.get('/', postController.getAllPosts);
 router.get('/:postId', postController.getPostById);

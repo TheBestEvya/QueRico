@@ -1,6 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import authController from '../controllers/authController';
 import { authenticateJwt } from '../middleware/auth';
+import passport from 'passport';
+
 
 const router = express.Router();
 // Public routes
@@ -55,7 +57,28 @@ const router = express.Router();
  *         refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
  */
 
+// Start Google OAuth flow
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
+// Handle Google callback and return JWT + profile picture
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { session: false }),
+  (req: Request, res: Response) => {
+    const { user, accessToken, refreshToken } = req.user as { user: any; accessToken: string ; refreshToken: string };
+
+    res.json({
+        accessToken,
+        refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profilePicture: user.profilePicture, // Send profile picture in response
+      },
+    });
+  }
+);
 
 /**
  * @swagger
@@ -103,7 +126,7 @@ router.post('/register', authController.register);
  * @swagger
  * components:
  *   schemas:
- *     LoginUser:
+ *     User:
  *       type: object
  *       required:
  *         - email
@@ -111,44 +134,46 @@ router.post('/register', authController.register);
  *       properties:
  *         email:
  *           type: string
- *           description: User's email address
- *           example: user@example.com
+ *           description: User email
  *         password:
  *           type: string
- *           description: User's password
- *           example: password123
- * 
- * /auth/login:
- *   post:
- *     summary: Logs in a user
- *     tags: 
- *       - Auth
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/LoginUser'
- *     responses:
- *       200:
- *         description: Successful login
+ *           description: User password
+ *       example:
+ *         email: 'name@email.com'
+ *         password: '123456'
+ * paths:
+ *   /auth/login:
+ *     post:
+ *       summary: Logs in a user
+ *       tags: 
+ *         - Auth
+ *       requestBody:
+ *         required: true
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 accessToken:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                 refreshToken:
- *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                 _id:
- *                   type: string
- *                   example: 60d0fe4f5311236168a109ca
- *       400:
- *         description: Invalid credentials or request
+ *               $ref: '#/components/schemas/User'
+ *       responses:
+ *         200:
+ *           description: Successful login
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   accessToken:
+ *                     type: string
+ *                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                   refreshToken:
+ *                     type: string
+ *                     example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                   _id:
+ *                     type: string
+ *                     example: 60d0fe4f5311236168a109ca
+ *         400:
+ *           description: Invalid credentials or request
  */
+
 
 router.post('/login', authController.login);
 
@@ -190,8 +215,6 @@ router.post('/login', authController.login);
 router.post('/refresh-token', authController.refreshToken);
 
 
-// router.post('/forgot-password', authController.forgotPassword);
-// router.post('/google', authController.googleAuth);
 
 // Protected routes (require authentication)
 router.use(authenticateJwt);
