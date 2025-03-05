@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-export interface IUser extends Document {
+export interface IUser{
     _id: mongoose.Types.ObjectId;
     name: string;
     email: string;

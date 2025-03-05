@@ -136,45 +136,6 @@ interface ForgotPasswordRequest extends Request {
     }
   }
 
-  // התחברות עם גוגל
-  const  googleAuth = async (req: GoogleAuthRequest, res: Response):Promise<any> =>{
-    try {
-      const { googleId, email, name, imageUrl } = req.body;
-
-      let user = await User.findOne({ email });
-
-      if (!user) {
-        user = await User.create({
-          name: name,
-          email,
-          googleId,
-          profileImage: imageUrl
-        });
-      } else {
-        await User.findByIdAndUpdate(user._id, { googleId });
-      }
-
-      const userId = user._id.toString();
-      const accessToken = generateAccessToken(userId);
-      const refreshToken = generateRefreshToken(userId);
-
-      await User.findByIdAndUpdate(userId, { refreshToken });
-
-      res.json({
-        user: {
-          id: userId,
-          name: user.name,
-          email: user.email,
-          profileImage: user.profileImage
-        },
-        accessToken,
-        refreshToken
-      });
-    } catch (error) {
-      res.status(500).json({ message: 'Error with Google authentication', error });
-    }
-  }
-
   // חידוש טוקן
   const  refreshToken = async(req: RefreshTokenRequest, res: Response):Promise<any>=> {
     try {
@@ -250,35 +211,8 @@ interface ForgotPasswordRequest extends Request {
     }
   }
 
-  // שכחתי סיסמה
-  // const  forgotPassword= async(req: ForgotPasswordRequest, res: Response):Promise<any>=> {
-  //   try {
-  //     const { email } = req.body;
-
-  //     const user = await User.findOne({ email });
-  //     if (!user) {
-  //       return res.status(404).json({ message: 'User not found' });
-  //     }
-
-  //     // יצירת טוקן לאיפוס סיסמה
-  //     const resetToken = jwt.sign(
-  //       { userId: user._id },
-  //       process.env.JWT_SECRET || 'your-secret-key',
-  //       { expiresIn: '1h' }
-  //     );
-
-  //     // בפרויקט אמיתי כאן היינו שולחים מייל עם הטוקן
-  //     res.json({ 
-  //       message: 'Password reset instructions sent to email',
-  //       resetToken // בפרויקט אמיתי לא נחזיר את הטוקן
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({ message: 'Error with forgot password', error });
-  //   }
-  // }
-
   // Private methods
-  const generateAccessToken = (userId: string): string =>{
+  export const generateAccessToken = (userId: string): string =>{
     const secret = process.env.JWT_SECRET ?? 'default';
     const expiresIn = process.env.JWT_EXPIRES_IN?? '1h';
     
@@ -290,11 +224,11 @@ interface ForgotPasswordRequest extends Request {
       { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
     );
   }
-  const  generateRefreshToken = (userId: string): string =>{
+  export const  generateRefreshToken = (userId: string): string =>{
     return jwt.sign(
       { userId }, 
       secret, 
       { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
     );
   }
-export default {register,login,googleAuth,refreshToken,logout,changePassword,/**forgotPassword*/};
+export default {register,login,refreshToken,logout,changePassword};
