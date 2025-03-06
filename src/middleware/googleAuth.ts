@@ -1,7 +1,6 @@
 import passport from 'passport';
 import dotenv from 'dotenv';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
-import jwt from 'jsonwebtoken';
 import { Request } from 'express';
 import {User , IUser} from '../models/userModel';
 import {generateRefreshToken , generateAccessToken} from '../controllers/authController';
@@ -29,7 +28,7 @@ passport.use(
       _accessToken: string,
       _refreshToken: string,
       profile: Profile,
-      done: (error: any, user?: { user: GoogleUser; accessToken: string; refreshToken: string }) => void
+      done: (error: any, user?: { user: GoogleUser; accessToken: string; refreshToken: string ;}) => void
     ) => {
       try {
        // Extract user info from Google profile
@@ -37,18 +36,15 @@ passport.use(
        const name = profile.displayName;
        const email = profile.emails?.[0].value;
        const profilePicture = profile.photos?.[0].value;
-
        // Check if user already exists
        let user = await User.findOne({ email });
-
        if (!user) {
-
          // Auto-register the user if not found
          user = await User.create({
-           googleId,
-           name,
-           email,
-           profilePicture
+           googleId : googleId,
+           name : name,
+           email : email,
+           profileImage : profilePicture
          });
        } else {
         // Update Google ID or profile picture if missing
@@ -61,7 +57,7 @@ passport.use(
        const refreshToken = generateRefreshToken(user._id.toString());
         await User.findByIdAndUpdate(user._id, { refreshToken });
 
-        return done(null, { user, accessToken, refreshToken });
+        return done(null, { user, accessToken, refreshToken});
      } catch (error) {
        return done(error);
      }

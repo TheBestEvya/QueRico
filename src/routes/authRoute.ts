@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import authController from '../controllers/authController';
 import { authenticateJwt } from '../middleware/auth';
 import passport from 'passport';
+import {uploadImage} from '../middleware/uploads'
 
 
 const router = express.Router();
@@ -120,7 +121,7 @@ router.get(
  *                   type: string
  *                   example: "Internal server error while creating a user"
  */
-router.post('/register', authController.register);
+router.post('/register',uploadImage.single('image'), authController.register);
 
 /**
  * @swagger
