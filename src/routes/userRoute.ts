@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticateJwt } from '../middleware/auth';
 import userController from '../controllers/userController';
+import {uploadImage} from '../middleware/uploads'
 
 
 const router = express.Router();
@@ -225,7 +226,7 @@ router.get('/', userController.getProfile)
  *       500:
  *         description: Internal server error
  */
-router.post('/update', userController.updateProfile)
+router.post('/update',uploadImage.single('image'), userController.updateProfile)
 
 /**
  * @swagger

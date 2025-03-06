@@ -62,7 +62,7 @@ interface ForgotPasswordRequest extends Request {
   const register=async  (req: RegisterRequest, res: Response):Promise<any>=> {
     try {
       const { name, email, password } = req.body;
-
+      
       const existingUser = await User.findOne({ 
         $or: [{ email }, { name }] 
       });
