@@ -14,7 +14,7 @@ const getProfile = async (req: userRequest, res: Response):Promise<any> => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    return res.json(user);
+    return res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching profile', error });
   }
@@ -29,7 +29,7 @@ const getUserById = async (req: Request, res: Response):Promise<any> => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching user', error });
   }
@@ -71,7 +71,7 @@ const updateProfile = async (req: userRequest, res: Response):Promise<any> => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(updatedUser);
+    res.status(200).json(updatedUser);
   } catch (error) {
     res.status(500).json({ message: 'Error updating profile', error });
   }
@@ -98,7 +98,7 @@ const getUserPosts = async (req: Request, res: Response):Promise<any> => {
 
     const total = await Post.countDocuments({ author: userId });
 
-    res.json({
+    res.status(200).json({
       posts,
       totalPages: Math.ceil(total / Number(limit)),
       currentPage: Number(page)
@@ -129,7 +129,7 @@ const deleteProfile = async (req: userRequest, res: Response):Promise<any> => {
       return res.status(404).json({ message: 'Error deleting user profile' });
     }
 
-    res.json({ message: 'User profile and related posts deleted successfully' });
+    res.status(200).json({ message: 'User profile and related posts deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting profile', error });
   }

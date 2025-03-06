@@ -9,9 +9,7 @@ interface CreateCommentRequest extends Request {
     params: {
       postId: string;
     };
-    user: {
-      id: string;
-    };
+    userId: string;
   };
  
 }
@@ -22,9 +20,7 @@ interface UpdateCommentRequest extends Request {
     params: {
       commentId: string;
     };
-    user: {
-      id: string;
-    };
+    userId: string;
   };
  
 }
@@ -45,7 +41,7 @@ interface GetCommentsRequest extends Request {
     try {
       const { text } = req.body;
       const { postId } = req.params;
-      const userId = req.body.user.id;
+      const userId = req.body.userId;
 
       // בדיקה שהפוסט קיים
       const post = await Post.findById(postId);
@@ -60,13 +56,8 @@ interface GetCommentsRequest extends Request {
         text
       });
 
-      // עדכון מונה התגובות בפוסט
-      await Post.findByIdAndUpdate(postId, {
-        $inc: { commentsCount: 1 }
-      });
-
       // החזרת התגובה עם פרטי המחבר
-      await comment.populate('author', 'username profileImage');
+      await comment.populate('author', 'name profileImage');
 
       res.status(201).json(comment);
     } catch (error) {
@@ -85,11 +76,11 @@ interface GetCommentsRequest extends Request {
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('author', 'username profileImage');
+        .populate('author', 'name profileImage');
 
       const total = await Comment.countDocuments({ post: postId });
 
-      res.json({
+      res.status(200).json({
         comments,
         currentPage: page,
         totalPages: Math.ceil(total / limit),
@@ -105,7 +96,7 @@ interface GetCommentsRequest extends Request {
     try {
       const { commentId } = req.params;
       const { text } = req.body;
-      const userId = req.body.user.id;
+      const userId = req.body.userId;
 
       const comment = await Comment.findOne({
         _id: commentId,
@@ -119,9 +110,9 @@ interface GetCommentsRequest extends Request {
       comment.text = text;
       await comment.save();
 
-      await comment.populate('author', 'username profileImage');
+      await comment.populate('author', 'name profileImage');
 
-      res.json(comment);
+      res.status(200).json(comment);
     } catch (error) {
      return res.status(500).json({ message: 'Error updating comment', error });
     }
@@ -131,7 +122,7 @@ interface GetCommentsRequest extends Request {
   const deleteComment = async (req: Request<{ commentId: string }>, res: Response):Promise<any> => {
     try {
       const { commentId } = req.params;
-      const userId = req.body.user.id;
+      const userId = req.body.userId;
 
       const comment = await Comment.findOne({
         _id: commentId,
@@ -144,51 +135,36 @@ interface GetCommentsRequest extends Request {
 
       await comment.deleteOne();
 
-    return  res.json({ message: 'Comment deleted successfully' });
+    return  res.status(200).json({ message: 'Comment deleted successfully' });
     } catch (error) {
     return res.status(500).json({ message: 'Error deleting comment', error });
     }
   }
 
   // קבלת כל התגובות של משתמש ספציפי
-  const getUserComments = async (req: Request<{ userId: string }>, res: Response):Promise<any>=> {
-    try {
-      const { userId } = req.params;
-      const page = parseInt(req.query.page as string || '1');
-      const limit = parseInt(req.query.limit as string || '10');
+  // const getUserComments = async (req: Request<{ userId: string }>, res: Response):Promise<any>=> {
+  //   try {
+  //     const { userId } = req.params;
+  //     const page = parseInt(req.query.page as string || '1');
+  //     const limit = parseInt(req.query.limit as string || '10');
 
-      const comments = await Comment.find({ author: userId })
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .populate('author', 'username profileImage')
-        .populate('post', 'text');
+  //     const comments = await Comment.find({ author: userId })
+  //       .sort({ createdAt: -1 })
+  //       .skip((page - 1) * limit)
+  //       .limit(limit)
+  //       .populate('author', 'username profileImage')
+  //       .populate('post', 'text');
 
-      const total = await Comment.countDocuments({ author: userId });
+  //     const total = await Comment.countDocuments({ author: userId });
 
-      res.json({
-        comments,
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        totalComments: total
-      });
-    } catch (error) {
-     return res.status(500).json({ message: 'Error fetching user comments', error });
-    }
-  }
-
-  // ספירת תגובות לפוסט
-  const getCommentCount = async (req: Request<{ postId: string }>, res: Response):Promise<any>=> {
-    try {
-      const { postId } = req.params;
-
-      const count = await Comment.countDocuments({ post: postId });
-
-      res.json({ count });
-    } catch (error) {
-     return res.status(500).json({ message: 'Error counting comments', error });
-    }
-  }
-
-
-export default { createComment, getComments, updateComment, deleteComment, getUserComments, getCommentCount };
+  //     res.json({
+  //       comments,
+  //       currentPage: page,
+  //       totalPages: Math.ceil(total / limit),
+  //       totalComments: total
+  //     });
+  //   } catch (error) {
+  //    return res.status(500).json({ message: 'Error fetching user comments', error });
+  //   }
+  // }
+export default { createComment, getComments, updateComment, deleteComment /**, getUserComments,*/};

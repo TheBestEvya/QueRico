@@ -8,10 +8,14 @@ import commentRoutes from './routes/commentRoute';
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import passport from './middleware/googleAuth'
+import http from 'http';
+import { initializeSocket } from '../src/services/socketIO'; // Import socketService
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app); // Create HTTP server to handle socket.io
+initializeSocket(server); // This will initialize the Socket.io functionality
 
 // Middleware
 app.use(express.json());
@@ -24,7 +28,7 @@ app.use((req, res, next) => {
 });
 app.use(passport.initialize());
 // Static files for images
-app.use('/uploads', express.static('uploads'));
+app.use(express.static('public'));
 // Routes
 //TODO :: add all routes needed
 app.use('/auth', authRoutes);
