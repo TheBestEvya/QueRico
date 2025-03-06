@@ -8,9 +8,7 @@ interface CreatePostRequest extends Request {
   body: {
     text: string;
     file?: Express.Multer.File;
-    user: {
-      id: string;
-    };
+    userId : string;
   };
  
 }
@@ -21,9 +19,7 @@ interface UpdatePostRequest extends Request {
   body: {
     text?: string;
     file?: Express.Multer.File;
-    user: {
-      id: string;
-    };
+    userId: string;
   };
  
 }
@@ -40,7 +36,7 @@ interface GetPostsRequest extends Request {
    const createPost= async (req: CreatePostRequest, res: Response):Promise<any> => {
     try {
       const { text } = req.body;
-      const userId = req.body.user.id;
+      const userId = req.body.userId;
 
       const post = await Post.create({
         author: userId,
@@ -48,7 +44,7 @@ interface GetPostsRequest extends Request {
         image: req.file?.filename
       });
       // fetch the data of the author - only username and profileImage
-      await post.populate('author', 'username profileImage');
+      await post.populate('author', 'name profileImage');
 
      return res.status(201).json(post);
     } catch (error) {
@@ -63,25 +59,25 @@ interface GetPostsRequest extends Request {
       const limit = parseInt(req.query.limit || '10');
       const userId = req.query.userId;
 
-      const query = userId ? { author: userId } : {};
+      // const query = userId ? { author: userId } : {};
 
-      const posts = await Post.find(query)
+      const posts = await Post.find()
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('author', 'username profileImage')
+        .populate('author', 'name profileImage')
         .populate({
           path: 'comments',
           options: { limit: 3 },
           populate: {
             path: 'author',
-            select: 'username profileImage'
+            select: 'name profileImage'
           }
         });
 
-      const total = await Post.countDocuments(query);
+      const total = await Post.countDocuments();
 
-      res.json({
+      res.status(200).json({
         posts,
         currentPage: page,
         totalPages: Math.ceil(total / limit),
@@ -96,12 +92,12 @@ interface GetPostsRequest extends Request {
  const getPostById = async (req: Request<{ postId: string }>, res: Response) :Promise<any>=> {
     try {
       const post = await Post.findById(req.params.postId)
-        .populate('author', 'username profileImage')
+        .populate('author', 'name profileImage')
         .populate({
           path: 'comments',
           populate: {
             path: 'author',
-            select: 'username profileImage'
+            select: 'name profileImage'
           }
         });
 
@@ -109,7 +105,7 @@ interface GetPostsRequest extends Request {
         return res.status(404).json({ message: 'Post not found' });
       }
 
-     return res.json(post);
+     return res.status(200).json(post);
     } catch (error) {
       return res.status(500).json({ message: 'Error fetching post', error });
     }
@@ -120,7 +116,7 @@ interface GetPostsRequest extends Request {
     try {
       const { postId } = req.params;
       const { text } = req.body;
-      const userId = req.body.user.id;
+      const userId = req.body.userId;
 
       const post = await Post.findOne({ _id: postId, author: userId });
       
@@ -137,9 +133,9 @@ interface GetPostsRequest extends Request {
         postId,
         { $set: updateData },
         { new: true }
-      ).populate('author', 'username profileImage');
+      ).populate('author', 'name profileImage');
 
-      res.json(updatedPost);
+      res.status(203).json(updatedPost);
     } catch (error) {
      return res.status(500).json({ message: 'Error updating post', error });
     }
@@ -149,7 +145,7 @@ interface GetPostsRequest extends Request {
   const deletePost=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-      const userId = req.body.user.id;
+      const userId = req.body.userId;
 
       const post = await Post.findOne({ _id: postId, author: userId });
       
@@ -159,10 +155,10 @@ interface GetPostsRequest extends Request {
 
       // מחיקת כל התגובות לפוסט
       await Comment.deleteMany({ post: postId });
-      
+      //TODO :: delete photo of the post
       await post.deleteOne();
 
-     return res.json({ message: 'Post deleted successfully' });
+     return res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
      return res.status(500).json({ message: 'Error deleting post', error });
     }
@@ -172,7 +168,7 @@ interface GetPostsRequest extends Request {
   const toggleLike=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-      const {userId} = req.body.user.id;
+      const {userId} = req.body.userId;
 
       const post = await Post.findById(postId);
       if (!post) {
@@ -191,7 +187,7 @@ interface GetPostsRequest extends Request {
 
       await post.save();
 
-      res.json({
+      res.status(200).json({
         likes: post.likes.length,
         isLiked: userLikedIndex === -1
       });
@@ -235,15 +231,15 @@ interface GetPostsRequest extends Request {
   const getPostLikes=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-
+      //TODO :: check of the username and profileImage is for users
       const post = await Post.findById(postId)
-        .populate('likes', 'username profileImage');
+        .populate('likes', 'name profileImage');
 
       if (!post) {
         return res.status(404).json({ message: 'Post not found' });
       }
 
-      res.json(post.likes);
+      res.status(200).json(post.likes);
     } catch (error) {
     return  res.status(500).json({ message: 'Error fetching likes', error });
     }

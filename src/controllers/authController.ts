@@ -121,7 +121,7 @@ interface ForgotPasswordRequest extends Request {
 
       await User.findByIdAndUpdate(userId, { refreshToken });
 
-      res.json({
+      res.status(200).json({
         user: {
           id: userId,
           name: user.name,
@@ -162,7 +162,7 @@ interface ForgotPasswordRequest extends Request {
 
       await User.findByIdAndUpdate(userId, { refreshToken: newRefreshToken });
 
-      res.json({
+      res.status(200).json({
         accessToken: newAccessToken,
         refreshToken: newRefreshToken
       });
@@ -181,7 +181,7 @@ interface ForgotPasswordRequest extends Request {
         { $unset: { refreshToken: 1 } }
       );
 
-      res.json({ message: 'Successfully logged out' });
+      res.status(200).json({ message: 'Successfully logged out' });
     } catch (error) {
       res.status(500).json({ message: 'Error logging out', error });
     }
