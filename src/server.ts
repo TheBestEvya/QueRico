@@ -10,6 +10,7 @@ import swaggerUI from "swagger-ui-express";
 import passport from './middleware/googleAuth'
 import http from 'http';
 import { initializeSocket } from '../src/services/socketIO'; // Import socketService
+import cors from 'cors'
 
 dotenv.config();
 
@@ -18,6 +19,10 @@ const server = http.createServer(app); // Create HTTP server to handle socket.io
 initializeSocket(server); // This will initialize the Socket.io functionality
 
 // Middleware
+app.use(cors({
+  origin: [process.env.FRONTEND_URL || 'http://localhost:5173'],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {

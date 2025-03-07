@@ -62,9 +62,8 @@ interface ForgotPasswordRequest extends Request {
   const register=async  (req: RegisterRequest, res: Response):Promise<any>=> {
     try {
       const { name, email, password } = req.body;
-      
       const existingUser = await User.findOne({ 
-        $or: [{ email }, { name }] 
+        $or: [{ email }] 
       });
 
       if (existingUser) {
@@ -72,13 +71,12 @@ interface ForgotPasswordRequest extends Request {
           message: 'email already exists' 
         });
       }
-
+      
       const user = await User.create({
         name,
         email,
         password
       });
-
       const userId = user._id.toString();
       const accessToken = generateAccessToken(userId);
       const refreshToken = generateRefreshToken(userId);
@@ -96,6 +94,7 @@ interface ForgotPasswordRequest extends Request {
         refreshToken
       });
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Error creating user', error });
     }
   }
@@ -104,7 +103,6 @@ interface ForgotPasswordRequest extends Request {
   const login = async (req: LoginRequest, res: Response):Promise<any> => {
     try {
       const { email, password } = req.body;
-
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });

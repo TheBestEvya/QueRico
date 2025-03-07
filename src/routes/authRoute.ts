@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import authController from '../controllers/authController';
 import { authenticateJwt } from '../middleware/auth';
-import passport from 'passport';
+// import passport from 'passport';
 import {uploadImage} from '../middleware/uploads'
 
 
@@ -58,28 +58,28 @@ const router = express.Router();
  *         refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
  */
 
-// Start Google OAuth flow
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// // Start Google OAuth flow
+// router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// Handle Google callback and return JWT + profile picture
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { session: false }),
-  (req: Request, res: Response) => {
-    const { user, accessToken, refreshToken } = req.user as { user: any; accessToken: string ; refreshToken: string };
+// // Handle Google callback and return JWT + profile picture
+// router.get(
+//   '/google/callback',
+//   passport.authenticate('google', {failureRedirect: '/login', session: false }),
+//   (req: Request, res: Response) => {
+//     const { user, accessToken, refreshToken } = req.user as { user: any; accessToken: string ; refreshToken: string };
 
-    res.json({
-        accessToken,
-        refreshToken,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        profilePicture: user.profilePicture, // Send profile picture in response
-      },
-    });
-  }
-);
+//     res.json({
+//         accessToken,
+//         refreshToken,
+//       user: {
+//         id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         profilePicture: user.profilePicture, // Send profile picture in response
+//       },
+//     });
+//   }
+// );
 
 /**
  * @swagger
