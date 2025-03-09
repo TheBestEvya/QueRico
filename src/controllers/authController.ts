@@ -71,7 +71,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
     const refreshToken = generateRefreshToken(user._id.toString());
     User.findByIdAndUpdate(user._id, { refreshToken });
 
-    return res.status(200).json({ accessToken, user });
+    return res.status(200).json({ accessToken,refreshToken, user });
   } catch (error) {
     console.error('Google sign-in error:', error);
     return res.status(500).json({ error: 'Internal server error' });
@@ -154,6 +154,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
   // חידוש טוקן
   const  refreshToken = async(req: RefreshTokenRequest, res: Response):Promise<any>=> {
     try {
+      console.log(req.body)
       const { refreshToken } = req.body;
       if (!refreshToken) {
         return res.status(401).json({ message: 'Refresh token required' });
