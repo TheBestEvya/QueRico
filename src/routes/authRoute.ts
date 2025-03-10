@@ -121,7 +121,7 @@ const router = express.Router();
  *                   type: string
  *                   example: "Internal server error while creating a user"
  */
-router.post('/register',uploadImage.single('image'), authController.register);
+router.post('/register',uploadImage.single('profileImage'), authController.register);
 // localhost:8080/auth/register
 
 router.post('/googleAuth', authController.googleSignIn);

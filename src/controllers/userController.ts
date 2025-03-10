@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { User } from '../models/userModel';
 import { Post } from '../models/postModel';
-
+import env from 'dotenv';
+env.config();
+const uploadPath = process.env.UPLOAD_PATH;
 interface userRequest extends Request {
   userId?: string;
 }
@@ -61,7 +63,7 @@ const updateProfile = async (req: userRequest, res: Response):Promise<any> => {
         $set: {
           name,
           email,
-          ...(req.file && { profileImage: req.file.filename })
+          ...(req.file && { profileImage: uploadPath+req.file.filename })
         }
       },
       { new: true }

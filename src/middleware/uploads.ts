@@ -14,16 +14,18 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
 try{
-    const { name, email } = req.body;
-
-    if (!name || !email) {
-      return cb(new Error('Missing required fields: name and email'), '');
+    const { name, email, text } = req.body;
+    if(text){
+      cb(null, file.originalname);
     }
+    else{
+    
      // Sanitize name and email to prevent invalid filenames
      const sanitizedName = name.replace(/[^a-zA-Z0-9-_]/g, '');
      const sanitizedEmail = email.replace(/[^a-zA-Z0-9-_]/g, '');
      const fileName = `${sanitizedName}_${sanitizedEmail}_${path.extname(file.originalname)}`;
      cb(null, fileName);
+    }
     } catch (error) {
       cb(error as Error, '');
     }
