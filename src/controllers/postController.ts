@@ -5,6 +5,7 @@ import { Comment, IComment } from '../models/commentModel';
 
 // Interfaces
 interface CreatePostRequest extends Request {
+  userId?:string;
   body: {
     text: string;
     file?: Express.Multer.File;
@@ -35,9 +36,8 @@ interface GetPostsRequest extends Request {
   // יצירת פוסט חדש
    const createPost= async (req: CreatePostRequest, res: Response):Promise<any> => {
     try {
+      const userId = req.userId;
       const { text } = req.body;
-      const userId = req.body.userId;
-
       const post = await Post.create({
         author: userId,
         text,
