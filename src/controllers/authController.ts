@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, IUser } from '../models/userModel';
 import { OAuth2Client } from 'google-auth-library';
-import { profile } from 'console';
-const secret = process.env.JWT_SECRET ?? 'default';
+import env from 'dotenv';
+env.config();
+    const uploadPath = process.env.UPLOAD_PATH;
+    const secret = process.env.JWT_SECRET ?? 'default';
     const expiresIn = process.env.JWT_EXPIRES_IN?? '1h';
     if (!secret) {
       throw new Error('Missing JWT_SECRET environment variable');
@@ -113,7 +115,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
           id: userId,
           name: user.name,
           email: user.email,
-          profileImage: user.profileImage
+          ...(req.file && { profileImage: uploadPath+req.file.filename })
         },
         accessToken,
         refreshToken
