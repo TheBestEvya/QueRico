@@ -3,8 +3,8 @@ import { IUser } from './userModel';
 import { IPost } from './postModel';
 
 export interface IComment extends Document {
-  author: IUser['_id'];
-  post: IPost['_id'];
+  author: IUser['id'];
+  post: IPost['id'];
   text: string;
   createdAt: Date;
   updatedAt: Date;

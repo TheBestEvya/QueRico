@@ -3,10 +3,10 @@ import { IUser } from './userModel';
 import { IComment, commentSchema } from './commentModel';
 
 export interface IPost extends Document {
-  author: IUser['_id'];
+  author: IUser['id'];
   text: string;
   image?: string;
-  likes: IUser['_id'][];
+  likes: IUser['id'][];
   comments: IComment[]; 
   createdAt: Date;
   updatedAt: Date;
