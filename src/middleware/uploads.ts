@@ -1,6 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import env from 'dotenv';
 
 const uploadDir = 'public/uploads';
 if (!fs.existsSync(uploadDir)) {
