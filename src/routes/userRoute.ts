@@ -5,9 +5,6 @@ import {uploadImage} from '../middleware/uploads'
 
 
 const router = express.Router();
-
-
-
 /**
  * @swagger
  * tags:
@@ -226,7 +223,7 @@ router.get('/', userController.getProfile)
  *       500:
  *         description: Internal server error
  */
-router.post('/update',uploadImage.single('image'), userController.updateProfile)
+router.post('/update',uploadImage.single('profileImage'), userController.updateProfile)
 
 /**
  * @swagger

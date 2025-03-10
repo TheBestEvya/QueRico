@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, IUser } from '../models/userModel';
 import { OAuth2Client } from 'google-auth-library';
+import { profile } from 'console';
 const secret = process.env.JWT_SECRET ?? 'default';
     const expiresIn = process.env.JWT_EXPIRES_IN?? '1h';
     if (!secret) {
@@ -61,7 +62,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
       // Auto-register new user
       user = await User.create({
         email,
-        imgUrl: picture,
+        profileImage: picture,
         name,
         password: 'google-signin', // Placeholder password
       });
@@ -71,7 +72,12 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
     const refreshToken = generateRefreshToken(user._id.toString());
     User.findByIdAndUpdate(user._id, { refreshToken });
 
-    return res.status(200).json({ accessToken, user });
+    return res.status(200).json({ accessToken, user:{
+      id : user._id,
+      name : user.name,
+      profileImage : user.profileImage,
+      email : user.email
+    } });
   } catch (error) {
     console.error('Google sign-in error:', error);
     return res.status(500).json({ error: 'Internal server error' });

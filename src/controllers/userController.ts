@@ -37,8 +37,8 @@ const getUserById = async (req: Request, res: Response):Promise<any> => {
 
 const updateProfile = async (req: userRequest, res: Response):Promise<any> => {
   try {
-    const userId = req.userId;
-    const { name, email } = req.body;
+    console.log(req.body);
+    const { name, email , userId } = req.body;
     
     // בדיקה האם השם משתמש או האימייל כבר קיימים
     const existingUser = await User.findOne({
