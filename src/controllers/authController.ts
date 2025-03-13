@@ -6,7 +6,9 @@ import env from 'dotenv';
 env.config();
     const uploadPath = process.env.UPLOAD_PATH;
     const secret = process.env.JWT_SECRET ?? 'default';
+    const refreshSecret = process.env.JWT_REFRESH_SECRET ?? 'default';
     const expiresIn = process.env.JWT_EXPIRES_IN?? '1h';
+    const refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN?? '7d';
     if (!secret) {
       throw new Error('Missing JWT_SECRET environment variable');
     }
@@ -173,10 +175,10 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
       }
 
       try {
-        jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key');
+        jwt.verify(refreshToken, refreshSecret);
       } catch (error) {
         await User.findByIdAndUpdate(user._id, { $unset: { refreshToken: 1 } });
-        return res.status(403).json({ message: 'Invalid refresh token' });
+        return res.status(403).json({ message: 'Invalid refresh token'});
       }
 
       const userId = user._id.toString();
@@ -243,10 +245,11 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
     );
   }
   export const  generateRefreshToken = (userId: string): string =>{
+    const random = Math.random().toString();
     return jwt.sign(
-      { userId }, 
-      secret, 
-      { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
+      { userId : userId, random : random }, 
+      refreshSecret, 
+      {expiresIn : refreshExpiresIn as jwt.SignOptions['expiresIn'] }
     );
   }
 export default {register,login,refreshToken,logout,changePassword, googleSignIn};
