@@ -9,7 +9,7 @@ interface AuthRequest extends Request {
 export const authenticateJwt = (req: AuthRequest, res: Response, next: NextFunction):any => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json({ message: 'Auth middleware - No token provided' });
   }
 
   const token = authHeader.split(' ')[1];
@@ -19,6 +19,6 @@ export const authenticateJwt = (req: AuthRequest, res: Response, next: NextFunct
     req.userId = decoded.userId;
    return next();
   } catch (error) {
-    return res.status(403).json({ message: 'Invalid or expired token' });
+    return res.status(403).json({ message: 'Auth middleware - Invalid or expired token' });
   }
 };

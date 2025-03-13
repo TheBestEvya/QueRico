@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { Post, IPost } from '../models/postModel';
 import { Comment, IComment } from '../models/commentModel';
+import env from 'dotenv';
+env.config();
+const uploadPath = process.env.UPLOAD_PATH ?? "http://localhost:5000/uploads/";
 
 // Interfaces
 interface CreatePostRequest extends Request {
@@ -14,13 +17,13 @@ interface CreatePostRequest extends Request {
  
 }
 interface UpdatePostRequest extends Request {
+  userId?: string;
   params: {
     postId: string;
   };
   body: {
     text?: string;
     file?: Express.Multer.File;
-    userId: string;
   };
  
 }
@@ -31,17 +34,28 @@ interface GetPostsRequest extends Request {
     userId?: string;
   };
 }
-
+interface deletePostRequest extends Request {
+  userId?:string;
+  params: {
+    postId: string;
+  };
+}
+interface toggleLikeRequest extends Request {
+  userId?:string;
+  params: {
+    postId: string;
+  };
+}
 
   // יצירת פוסט חדש
    const createPost= async (req: CreatePostRequest, res: Response):Promise<any> => {
     try {
-      const userId = req.userId;
+      const userId = req.userId as string;
       const { text } = req.body;
       const post = await Post.create({
         author: userId,
         text,
-        image: req.file?.filename
+        image: uploadPath + req.file?.filename
       });
       // fetch the data of the author - only username and profileImage
       await post.populate('author', 'name profileImage');
@@ -57,15 +71,12 @@ interface GetPostsRequest extends Request {
     try {
       const page = parseInt(req.query.page || '1');
       const limit = parseInt(req.query.limit || '10');
-      const userId = req.query.userId;
-
-      // const query = userId ? { author: userId } : {};
 
       const posts = await Post.find()
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
-        .populate('author', 'name profileImage')
+        .populate('author', 'id name profileImage')
         .populate({
           path: 'comments',
           options: { limit: 3 },
@@ -74,7 +85,6 @@ interface GetPostsRequest extends Request {
             select: 'name profileImage'
           }
         });
-
       const total = await Post.countDocuments();
 
       res.status(200).json({
@@ -116,7 +126,7 @@ interface GetPostsRequest extends Request {
     try {
       const { postId } = req.params;
       const { text } = req.body;
-      const userId = req.body.userId;
+      const userId = req.userId;
 
       const post = await Post.findOne({ _id: postId, author: userId });
       
@@ -126,7 +136,9 @@ interface GetPostsRequest extends Request {
 
       const updateData: any = { text };
       if (req.file) {
-        updateData.image = req.file.filename;
+        updateData.image =uploadPath + req.file.filename;
+      }else{
+        updateData.image = null;
       }
 
       const updatedPost = await Post.findByIdAndUpdate(
@@ -142,10 +154,10 @@ interface GetPostsRequest extends Request {
   }
 
   // מחיקת פוסט
-  const deletePost=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
+  const deletePost=async(req: deletePostRequest, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-      const userId = req.body.userId;
+      const userId = req.userId;
 
       const post = await Post.findOne({ _id: postId, author: userId });
       
@@ -165,21 +177,24 @@ interface GetPostsRequest extends Request {
   }
 
   // הוספת/הסרת לייק
-  const toggleLike=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
+
+  const toggleLike=async(req: toggleLikeRequest, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-      const {userId} = req.body.userId;
-
+      const userId = req.userId;
+      const userIdObjectId = new mongoose.Types.ObjectId(userId);
       const post = await Post.findById(postId);
       if (!post) {
         return res.status(404).json({ message: 'Post not found' });
       }
 
-      const userLikedIndex = post.likes.indexOf(userId);
+      const userLikedIndex = post.likes.indexOf(userIdObjectId);
       
       if (userLikedIndex === -1) {
         // הוספת לייק
-        post.likes.push(userId);
+        if (userId) {
+          post.likes.push(userIdObjectId);
+        }
       } else {
         // הסרת לייק
         post.likes.splice(userLikedIndex, 1);
