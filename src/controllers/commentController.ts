@@ -9,8 +9,8 @@ interface CreateCommentRequest extends Request {
     params: {
       postId: string;
     };
-    userId: string;
   };
+  userId? : string;
  
 }
 
@@ -41,7 +41,7 @@ interface GetCommentsRequest extends Request {
     try {
       const { text } = req.body;
       const { postId } = req.params;
-      const userId = req.body.userId;
+      const userId = req.userId;
 
       // בדיקה שהפוסט קיים
       const post = await Post.findById(postId);
@@ -141,30 +141,4 @@ interface GetCommentsRequest extends Request {
     }
   }
 
-  // קבלת כל התגובות של משתמש ספציפי
-  // const getUserComments = async (req: Request<{ userId: string }>, res: Response):Promise<any>=> {
-  //   try {
-  //     const { userId } = req.params;
-  //     const page = parseInt(req.query.page as string || '1');
-  //     const limit = parseInt(req.query.limit as string || '10');
-
-  //     const comments = await Comment.find({ author: userId })
-  //       .sort({ createdAt: -1 })
-  //       .skip((page - 1) * limit)
-  //       .limit(limit)
-  //       .populate('author', 'username profileImage')
-  //       .populate('post', 'text');
-
-  //     const total = await Comment.countDocuments({ author: userId });
-
-  //     res.json({
-  //       comments,
-  //       currentPage: page,
-  //       totalPages: Math.ceil(total / limit),
-  //       totalComments: total
-  //     });
-  //   } catch (error) {
-  //    return res.status(500).json({ message: 'Error fetching user comments', error });
-  //   }
-  // }
-export default { createComment, getComments, updateComment, deleteComment /**, getUserComments,*/};
+export default { createComment, getComments, updateComment, deleteComment};

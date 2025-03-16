@@ -74,7 +74,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
     const refreshToken = generateRefreshToken(user._id.toString());
     User.findByIdAndUpdate(user._id, { refreshToken });
 
-    return res.status(200).json({ accessToken, user:{
+    return res.status(200).json({ accessToken,refreshToken, user:{
       id : user._id,
       name : user.name,
       profileImage : user.profileImage,
@@ -166,7 +166,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
       if (!refreshToken) {
         return res.status(401).json({ message: 'Refresh token required' });
       }
-
+      console.log(refreshToken)
       const user = await User.findOne({ refreshToken });
       if (!user) {
         return res.status(403).json({ message: 'Invalid refresh token' });
