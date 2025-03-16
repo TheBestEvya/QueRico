@@ -21,8 +21,14 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
     unique: true,
-    lowercase: true
-  },
+    lowercase: true,
+    validate: {
+        validator: function (value: string) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        },
+        message: 'Invalid email format',
+    },
+},
   password: {
     type: String,
     required: function(this: IUser) {
