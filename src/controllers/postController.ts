@@ -52,11 +52,16 @@ interface toggleLikeRequest extends Request {
     try {
       const userId = req.userId as string;
       const { text } = req.body;
+
       const post = await Post.create({
         author: userId,
-        text,
-        image: uploadPath + req.file?.filename
+        text
       });
+      if(req.file !== undefined){
+        post.image = uploadPath + req.file?.filename;
+        await post.save();
+      }
+                
       // fetch the data of the author - only username and profileImage
       await post.populate('author', 'name profileImage');
 
@@ -68,6 +73,7 @@ interface toggleLikeRequest extends Request {
 
   // קבלת כל הפוסטים עם paging
   const getAllPosts = async(req: GetPostsRequest, res: Response)=> {
+    console.log("All posts - Page ", req.query.page)
     try {
       const page = parseInt(req.query.page || '1');
       const limit = parseInt(req.query.limit || '10');
@@ -221,7 +227,16 @@ interface toggleLikeRequest extends Request {
       const posts = await Post.find({ author: userId })
         .skip((page - 1) * limit) // Skip previous pages
         .limit(limit) // Limit results per page
-        .sort({ createdAt: -1 }); // Optional: Sort by newest
+        .sort({ createdAt: -1 })
+        .populate('author', 'name profileImage')
+        .populate({
+          path: 'comments',
+          options: { limit: 3 },
+          populate: {
+            path: 'author',
+            select: 'name profileImage'
+          }
+        });
   
       const totalPosts = await Post.countDocuments({ author: userId });
   

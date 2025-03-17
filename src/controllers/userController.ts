@@ -135,5 +135,13 @@ const deleteProfile = async (req: userRequest, res: Response):Promise<any> => {
     res.status(500).json({ message: 'Error deleting profile', error });
   }
 };
+const getAllUsers = async (req: Request, res: Response):Promise<any> => {
+try{
+const users = await User.find({}).select('-password -refreshToken -createdAt');
+res.status(200).json({users : users});
+}catch(error){  
+  res.status(500).json({ message: 'Error fetching users', error });
+}
 
-export default {getProfile, getUserById, updateProfile, getUserPosts, deleteProfile};
+}
+export default {getAllUsers , getProfile, getUserById, updateProfile, getUserPosts, deleteProfile};

@@ -9,14 +9,14 @@ import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import path from 'path';
 import http from 'http';
-import { initializeSocket } from '../src/services/socketIO'; // Import socketService
+// import { initializeSocket } from '../src/services/socketIO'; // Import socketService
 import cors from 'cors'
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server to handle socket.io
-initializeSocket(server); // This will initialize the Socket.io functionality
+// initializeSocket(server); // This will initialize the Socket.io functionality
 
 // Middleware
 app.use(cors({
@@ -35,7 +35,6 @@ app.use((req, res, next) => {
 // Static files for images
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 // Routes
-//TODO :: add all routes needed
 app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);
@@ -63,14 +62,14 @@ db.on("error", (error) => console.error(error));
 db.once("open", () => console.log("Connected to database"));
 
 const initApp = () => {
-  return new Promise<Express>((resolve, reject) => {
+  return new Promise<{app : Express , server : http.Server}>((resolve, reject) => {
     if (!process.env.MONGODB_URI) {
       reject("MONGODB_URI is not defined in .env file");
     } else {
       mongoose
         .connect(process.env.MONGODB_URI)
         .then(() => {
-          resolve(app);
+          resolve({app,server});
         })
         .catch((error) => {
           reject(error);

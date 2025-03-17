@@ -33,9 +33,10 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
+    "prod" : "cp .env.prod .env && tsc && node dist/app.js",
+    "dev": "cp .env.dev .env && nodemon ./src/app.ts",
     "testAuth": "jest --detectOpenHandles --forceExit auth.test.ts",
     "start": "ts-node src/app.ts",
-    "dev": "nodemon --exec ts-node src/app.ts",
     "test": "jest --detectOpenHandles --coverage --forceExit"
   }
 }
