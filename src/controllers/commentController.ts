@@ -20,11 +20,17 @@ interface UpdateCommentRequest extends Request {
     params: {
       commentId: string;
     };
-    userId: string;
   };
+  userId?: string;
  
 }
+interface deleteRequest extends Request {
+params: {
+  commentId: string;
+}
+userId?: string;
 
+}
 interface GetCommentsRequest extends Request {
   params: {
     postId: string;
@@ -37,33 +43,39 @@ interface GetCommentsRequest extends Request {
 
 
   // יצירת תגובה חדשה
-  const createComment = async (req: CreateCommentRequest, res: Response):Promise<any> =>{
+  const createComment = async (req: CreateCommentRequest, res: Response): Promise<any> => {
     try {
       const { text } = req.body;
       const { postId } = req.params;
       const userId = req.userId;
-
-      // בדיקה שהפוסט קיים
+  
+      // Check if the post exists
       const post = await Post.findById(postId);
       if (!post) {
         return res.status(404).json({ message: 'Post not found' });
       }
-
-      // יצירת התגובה
+  
+      // Create the comment
       const comment = await Comment.create({
         author: userId,
         post: postId,
         text
       });
-
-      // החזרת התגובה עם פרטי המחבר
+  
+      // Populate the author field of the comment
       await comment.populate('author', 'name profileImage');
-
+  
+      // Update the post document to add the new comment
+      post.comments.push(comment);  // Add the new comment's ID to the post's comments array
+      await post.save();  // Save the updated post
+  
+      // Return the newly created comment along with the author's information
       res.status(201).json(comment);
     } catch (error) {
-    return  res.status(500).json({ message: 'Error creating comment', error });
+      return res.status(500).json({ message: 'Error creating comment', error });
     }
-  }
+  };
+  
 
   // קבלת כל התגובות לפוסט
   const getComments = async (req: GetCommentsRequest, res: Response) :Promise<any> => {
@@ -96,7 +108,7 @@ interface GetCommentsRequest extends Request {
     try {
       const { commentId } = req.params;
       const { text } = req.body;
-      const userId = req.body.userId;
+      const userId = req.userId;
 
       const comment = await Comment.findOne({
         _id: commentId,
@@ -119,20 +131,20 @@ interface GetCommentsRequest extends Request {
   }
 
   // מחיקת תגובה
-  const deleteComment = async (req: Request<{ commentId: string }>, res: Response):Promise<any> => {
+  const deleteComment = async (req: deleteRequest, res: Response):Promise<any> => {
     try {
       const { commentId } = req.params;
-      const userId = req.body.userId;
-
+      const userId = req.userId;
+      
       const comment = await Comment.findOne({
-        _id: commentId,
-        author: userId
+        _id: commentId
       });
-
       if (!comment) {
-        return res.status(404).json({ message: 'Comment not found or unauthorized' });
+        return res.status(404).json({ message: 'Comment not found' });
       }
-
+      await Post.findByIdAndUpdate(comment.post, {
+        $pull: { comments: { _id: commentId } }
+      });
       await comment.deleteOne();
 
     return  res.status(200).json({ message: 'Comment deleted successfully' });

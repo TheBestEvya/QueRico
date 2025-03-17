@@ -217,7 +217,7 @@ router.get('/', postController.getAllPosts);
  *                 error:
  *                   type: string
  */
-
+router.get('/user/:userId', postController.getPostsByUser);
 router.get('/:postId', postController.getPostById);
 /**
  * @swagger

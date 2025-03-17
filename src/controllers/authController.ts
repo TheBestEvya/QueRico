@@ -168,7 +168,6 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
       if (!refreshToken) {
         return res.status(401).json({ message: 'Refresh token required' });
       }
-      console.log(refreshToken)
       const user = await User.findOne({ refreshToken });
       if (!user) {
         return res.status(403).json({ message: 'Invalid refresh token' });

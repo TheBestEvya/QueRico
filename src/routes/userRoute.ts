@@ -129,6 +129,9 @@ const router = express.Router();
  */
 router.get('/allPosts', userController.getUserPosts)
 
+router.get('/getAll' , userController.getAllUsers)
+
+
 /**
  * @swagger
  * /users/{userId}:
