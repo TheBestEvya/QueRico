@@ -9,14 +9,12 @@ import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
 import path from 'path';
 import http from 'http';
-// import { initializeSocket } from '../src/services/socketIO'; // Import socketService
 import cors from 'cors'
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app); // Create HTTP server to handle socket.io
-// initializeSocket(server); // This will initialize the Socket.io functionality
 
 // Middleware
 app.use(cors({
@@ -31,7 +29,6 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "*");
   next();
 });
-// app.use(passport.initialize());
 // Static files for images
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 // Routes
@@ -48,7 +45,7 @@ const options = {
       version: "1.0.0",
       description: "REST server including authentication using JWT",
     },
-    servers: [{ url: "http://localhost:3001", },],
+    servers: [{ url: "http://localhost:3001", },{url : process.env.DOMAIN_URL}],
   },
   apis: ["./src/routes/*.ts"],
 };

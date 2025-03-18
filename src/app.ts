@@ -1,11 +1,25 @@
 import initApp from "./server";
 import { initializeSocket } from '../src/services/socketIO'; // Import socketService
+import https from "https"
+import fs from "fs"
 
 const port = process.env.PORT;
 
 initApp().then(({app , server}) => {
+  if(process.env.NODE_ENV !== "production"){
   initializeSocket(server); // This will initialize the Socket.io functionality
   server.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`QueRico app listening at http://localhost:${port}`);
   });
+}else{
+  const prop = {
+     key : fs.readFileSync("../client-key.pem"),
+     cert : fs.readFileSync("../client-cert.pem")
+  }
+  const httpsServer = https.createServer(prop,app)
+  initializeSocket(httpsServer)
+  httpsServer.listen(port, () => {
+    console.log(`QueRico app listening at https://localhost:${port}`);
+  });
+}
 });
