@@ -36,6 +36,7 @@
     "prod": "cp .env.prod .env && tsc -p tsconfig.prod.json && pm2 restart ecosystem.config.js --env production",
     "dev": "cp .env.dev .env && nodemon ./src/app.ts",
     "testAuth": "jest --detectOpenHandles --forceExit auth.test.ts",
+    "testPost": "jest --detectOpenHandles --forceExit post.test.ts",
     "start": "ts-node src/app.ts",
     "test": "jest --detectOpenHandles --coverage --forceExit"
   }

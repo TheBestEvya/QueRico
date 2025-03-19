@@ -34,6 +34,7 @@ interface RefreshTokenRequest extends Request {
   body: {
     refreshToken: string;
   };
+  userId? : string;
 }
 interface ChangePasswordRequest extends Request {
   body: {
@@ -203,11 +204,41 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
         { refreshToken },
         { $unset: { refreshToken: 1 } }
       );
+      // בקובץ authController.ts או דומה
+
+
+  try {
+    // מניחים שהמשתמש כבר אומת ו-req.user מכיל את המידע על המשתמש הנוכחי
+    const userId = req.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    // עדכון המשתמש על ידי מחיקת הרפרש טוקן מהמסד נתונים
+    const userM = await User.findById(userId);
+    
+    if (!userM) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // מחיקת הרפרש טוקן על ידי קביעתו לערך ריק
+    userM.refreshToken = "";
+    await userM.save();
+    
+    // מוחזרת תשובה מוצלחת
+    return res.status(200).json({ message: "Successfully logged out" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({ message: "Error logging out" });
+  }
+
 
       res.status(200).json({ message: 'Successfully logged out' });
     } catch (error) {
       res.status(500).json({ message: 'Error logging out', error });
     }
+
   }
   // שינוי סיסמה
   const changePassword = async(req: ChangePasswordRequest, res: Response):Promise<any> =>{
