@@ -5,11 +5,12 @@ import { Express } from "express";
 import { User as userModel,IUser } from "../models/userModel";
 import jwt from "jsonwebtoken";
 
-var app: Express;
+var app1: Express;
 
 beforeAll(async () => {
   console.log("beforeAll");
-  app = await initApp();
+  const {app , server} = await initApp();
+  app1=app
   await userModel.deleteMany();
 //   await postModel.deleteMany();
 });
@@ -38,7 +39,7 @@ const testUser: User = {
 
 describe("Auth Tests", () => {
     test("Auth test register", async () => {
-        const response = await request(app).post(baseUrl + "/register").send(testUser);
+        const response = await request(app1).post(baseUrl + "/register").send(testUser);
         expect(response.statusCode).toBe(201);
     });
     // בדיקת רישום מוצלח עם בדיקת מבנה התשובה
@@ -49,7 +50,7 @@ test("Auth test register - successful response structure", async () => {
     password: "responsepassword"
   };
   
-  const response = await request(app).post(baseUrl + "/register").send(newUser);
+  const response = await request(app1).post(baseUrl + "/register").send(newUser);
   
   expect(response.statusCode).toBe(201);
   expect(response.body).toHaveProperty('user');
@@ -62,7 +63,7 @@ test("Auth test register - successful response structure", async () => {
 // בדיקת רישום עם אימייל שכבר קיים
 test("Auth test register - duplicate email", async () => {
   // ניסיון נוסף לרשום את אותו משתמש
-  const response = await request(app).post(baseUrl + "/register").send(testUser);
+  const response = await request(app1).post(baseUrl + "/register").send(testUser);
   
   expect(response.statusCode).toBe(400);
   expect(response.body).toHaveProperty('message');
@@ -77,7 +78,7 @@ test("Auth test register - invalid email", async () => {
     password: "password123"
   };
   
-  const response = await request(app).post(baseUrl + "/register").send(invalidEmailUser);
+  const response = await request(app1).post(baseUrl + "/register").send(invalidEmailUser);
   expect(response.statusCode).not.toBe(201);
 });
 
@@ -88,7 +89,7 @@ test("Auth test register - missing fields", async () => {
     // חסר שם וסיסמה
   };
   
-  const response = await request(app).post(baseUrl + "/register").send(missingFieldsUser);
+  const response = await request(app1).post(baseUrl + "/register").send(missingFieldsUser);
   expect(response.statusCode).not.toBe(201);
 });
 
@@ -96,19 +97,19 @@ test("Auth test register - missing fields", async () => {
 
 
     test("Auth test login", async () => {
-    const response = await request(app).post(baseUrl + "/login").send({email : testUser.email ,password : testUser.password});
+    const response = await request(app1).post(baseUrl + "/login").send({email : testUser.email ,password : testUser.password});
     expect(response.statusCode).toBe(200);
     expect(response.body.accessToken).toBeDefined();
     expect(response.body.user).toBeDefined();
     });
     test("Auth test login - fail", async () => {
-    const response = await request(app).post(baseUrl + "/login").send({email : "email" ,password : testUser.password});
+    const response = await request(app1).post(baseUrl + "/login").send({email : "email" ,password : testUser.password});
     expect(response.statusCode).toBe(401);
     });
 
     // בדיקת התחברות עם סיסמה שגויה
 test("Auth test login - wrong password", async () => {
-  const response = await request(app).post(baseUrl + "/login").send({
+  const response = await request(app1).post(baseUrl + "/login").send({
     email: testUser.email,
     password: "wrongpassword123"
   });
@@ -118,7 +119,7 @@ test("Auth test login - wrong password", async () => {
 
 // בדיקת מבנה התשובה המלא בהתחברות מוצלחת
 test("Auth test login - response structure", async () => {
-  const response = await request(app).post(baseUrl + "/login").send({
+  const response = await request(app1).post(baseUrl + "/login").send({
     email: testUser.email,
     password: testUser.password
   });
@@ -140,7 +141,7 @@ test("Auth test login - response structure", async () => {
 
 // בדיקה שהרפרש טוקן מתעדכן במסד הנתונים
 test("Auth test login - refresh token updated", async () => {
-  const response = await request(app).post(baseUrl + "/login").send({
+  const response = await request(app1).post(baseUrl + "/login").send({
     email: testUser.email,
     password: testUser.password
   });
@@ -159,13 +160,13 @@ test("Auth test login - refresh token updated", async () => {
 // בדיקת התחברות ללא שדות נדרשים
 test("Auth test login - missing fields", async () => {
   // חסר אימייל
-  const responseNoEmail = await request(app).post(baseUrl + "/login").send({
+  const responseNoEmail = await request(app1).post(baseUrl + "/login").send({
     password: testUser.password
   });
   expect(responseNoEmail.statusCode).not.toBe(200);
   
   // חסרה סיסמה
-  const responseNoPassword = await request(app).post(baseUrl + "/login").send({
+  const responseNoPassword = await request(app1).post(baseUrl + "/login").send({
     email: testUser.email
   });
   expect(responseNoPassword.statusCode).not.toBe(200);
@@ -181,7 +182,7 @@ test("Auth test login - server error handling", async () => {
     throw new Error('Database error');
   });
   
-  const response = await request(app).post(baseUrl + "/login").send({
+  const response = await request(app1).post(baseUrl + "/login").send({
     email: testUser.email,
     password: testUser.password
   });
@@ -204,11 +205,11 @@ describe("Auth Tests - Refresh Token",() => {
 }
 
   test("Refresh token - successful refresh", async () => {
-    const registerResponse = await request(app).post(baseUrl + "/register").send(testUser2);
+    const registerResponse = await request(app1).post(baseUrl + "/register").send(testUser2);
     expect(registerResponse.statusCode).toBe(201);
 
 // נתחבר כדי לקבל רענון טוקן
-const loginResponse = await request(app).post(baseUrl + "/login").send({
+const loginResponse = await request(app1).post(baseUrl + "/login").send({
   email: testUser2.email,
   password: testUser2.password
 });
@@ -216,7 +217,7 @@ const loginResponse = await request(app).post(baseUrl + "/login").send({
 expect(loginResponse.statusCode).toBe(200);
 refreshToken = loginResponse.body.refreshToken;
   // בדיקת חידוש תקין של טוקן
-    const response = await request(app).post(baseUrl + '/refresh-token').send({ refreshToken });
+    const response = await request(app1).post(baseUrl + '/refresh-token').send({ refreshToken });
     console.log(response.body)
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("accessToken");
@@ -226,7 +227,7 @@ refreshToken = loginResponse.body.refreshToken;
 
   // בדיקת חידוש טוקן ללא שליחתו
   test("Refresh token - missing token", async () => {
-    const response = await request(app).post(baseUrl + "/refresh-token").send({});
+    const response = await request(app1).post(baseUrl + "/refresh-token").send({});
     
     expect(response.statusCode).toBe(401);
     expect(response.body.message).toBe("Refresh token required");
@@ -234,7 +235,7 @@ refreshToken = loginResponse.body.refreshToken;
 
   // בדיקת חידוש עם טוקן לא תקף
   test("Refresh token - invalid token", async () => {
-    const response = await request(app).post(baseUrl + "/refresh-token").send({ refreshToken: "invalid_token" });
+    const response = await request(app1).post(baseUrl + "/refresh-token").send({ refreshToken: "invalid_token" });
     
     expect(response.statusCode).toBe(403);
     expect(response.body.message).toBe("Invalid refresh token");
@@ -249,7 +250,7 @@ refreshToken = loginResponse.body.refreshToken;
       throw new Error("Database error");
     });
 
-    const response = await request(app).post(baseUrl + "/refresh-token").send({ refreshToken });
+    const response = await request(app1).post(baseUrl + "/refresh-token").send({ refreshToken });
 
     expect(response.statusCode).toBe(500);
     expect(response.body).toHaveProperty("message");
@@ -264,7 +265,7 @@ refreshToken = loginResponse.body.refreshToken;
     // ניצור טוקן פג תוקף
     const expiredToken = jwt.sign({ id: "fakeUserId" }, process.env.JWT_REFRESH_SECRET || "your-refresh-secret-key", { expiresIn: "-10s" });
 
-    const response = await request(app).post(baseUrl + "/refresh-token").send({ refreshToken: expiredToken });
+    const response = await request(app1).post(baseUrl + "/refresh-token").send({ refreshToken: expiredToken });
 
     expect(response.statusCode).toBe(403);
     expect(response.body.message).toBe("Invalid refresh token");
@@ -274,6 +275,194 @@ refreshToken = loginResponse.body.refreshToken;
     expect(user).toBeNull();
   });
 });
+
+describe("Auth Tests - Logout", () => {
+  let accessToken: string;
+  let refreshToken: string;
+  const logoutUser: User = {
+    name: "logout",
+    email: "logout@user.com",
+    password: "logoutpassword",
+  };
+
+  // לפני הטסט נרשום ונתחבר עם משתמש בשביל לקבל טוקנים
+  beforeAll(async () => {
+    const registerResponse = await request(app1).post(baseUrl + "/register").send(logoutUser);
+    expect(registerResponse.statusCode).toBe(201);
+
+    const loginResponse = await request(app1).post(baseUrl + "/login").send({
+      email: logoutUser.email,
+      password: logoutUser.password
+    });
+
+    expect(loginResponse.statusCode).toBe(200);
+    accessToken = loginResponse.body.accessToken;
+    refreshToken = loginResponse.body.refreshToken;
+    logoutUser.accessToken = accessToken;
+    logoutUser.refreshToken = refreshToken;
+  });
+
+  // בדיקת התנתקות מוצלחת
+  test("Logout - successful logout", async () => {
+    const response = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send();
+    
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.message).toBe("Successfully logged out");
+    
+    // בודק שהרפרש טוקן נמחק מהמשתמש במסד הנתונים
+    const user = await userModel.findOne({ email: logoutUser.email });
+    expect(user).not.toBeNull();
+    expect(user?.refreshToken).toBe("");
+  });
+
+  // בדיקת התנתקות ללא טוקן הרשאה
+  test("Logout - missing access token", async () => {
+    const response = await request(app1)
+      .post(baseUrl + "/logout")
+      .send();
+    
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.message).toBe("No token provided");
+  });
+
+  // בדיקת התנתקות עם טוקן הרשאה לא תקף
+  test("Logout - invalid access token", async () => {
+    const response = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", "Bearer invalid_token")
+      .send();
+    
+    expect(response.statusCode).toBe(403);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.message).toBe("Invalid or expired token");
+  });
+
+  // בדיקת התנתקות לאחר שכבר התנתקנו - צריך להצליח
+  test("Logout - already logged out", async () => {
+    // התחברות מחדש כדי לקבל טוקן תקף
+    const loginResponse = await request(app1).post(baseUrl + "/login").send({
+      email: logoutUser.email,
+      password: logoutUser.password
+    });
+    
+    expect(loginResponse.statusCode).toBe(200);
+    const newAccessToken = loginResponse.body.accessToken;
+    
+    // התנתקות פעם ראשונה
+    const logoutResponse1 = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", `Bearer ${newAccessToken}`)
+      .send();
+    
+    expect(logoutResponse1.statusCode).toBe(200);
+    
+    // התנתקות פעם שנייה עם אותו טוקן
+    const logoutResponse2 = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", `Bearer ${newAccessToken}`)
+      .send();
+    
+    // האם הטוקן עדיין תקף? תלוי באימפלמנטציה
+    // במקרה שהטוקן תקף עד לפקיעתו
+    expect(logoutResponse2.statusCode).toBe(200);
+  });
+
+  // בדיקת התנתקות עבור משתמש שלא קיים במערכת
+  test("Logout - non-existent user", async () => {
+    // יצירת טוקן תקף למשתמש שנמחק
+    const fakeToken = jwt.sign(
+      { id: new mongoose.Types.ObjectId().toString() }, 
+      process.env.JWT_SECRET || "your-secret-key",
+      { expiresIn: "15m" }
+    );
+    
+    const response = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", `Bearer ${fakeToken}`)
+      .send();
+    
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.message).toBe("User not authenticated");
+  });
+
+  // בדיקת התנתקות עם טוקן פג תוקף
+  test("Logout - expired token", async () => {
+    // יצירת טוקן פג תוקף
+    const expiredToken = jwt.sign(
+      { id: new mongoose.Types.ObjectId().toString() }, 
+      process.env.JWT_SECRET || "your-secret-key", 
+      { expiresIn: "-10s" }
+    );
+    
+    const response = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", `Bearer ${expiredToken}`)
+      .send();
+    
+    expect(response.statusCode).toBe(403);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.message).toBe("Invalid or expired token");
+  });
+
+  // בדיקת טיפול בשגיאות שרת
+  test("Logout - server error handling", async () => {
+    const originalFindById = userModel.findById;
+    
+    // מוק לפונקציה שזורקת שגיאה
+    userModel.findById = jest.fn().mockImplementationOnce(() => {
+      throw new Error("Database error");
+    });
+    
+    const response = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", `Bearer ${accessToken}`)
+      .send();
+    
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.message).toBe("Error logging out");
+    
+    // החזרת הפונקציה המקורית
+    userModel.findById = originalFindById;
+  });
+
+  // בדיקת התנהגות אחרי התנתקות - ניסיון לרענן טוקן עם רפרש טוקן שנמחק
+  test("Post-logout - refresh token should be invalid", async () => {
+    // התחברות מחדש
+    const loginResponse = await request(app1).post(baseUrl + "/login").send({
+      email: logoutUser.email,
+      password: logoutUser.password
+    });
+    
+    expect(loginResponse.statusCode).toBe(200);
+    const newAccessToken = loginResponse.body.accessToken;
+    const newRefreshToken = loginResponse.body.refreshToken;
+    
+    // התנתקות
+    const logoutResponse = await request(app1)
+      .post(baseUrl + "/logout")
+      .set("Authorization", `Bearer ${newAccessToken}`)
+      .send();
+    
+    expect(logoutResponse.statusCode).toBe(200);
+    
+    // ניסיון לרענן טוקן אחרי התנתקות
+    const refreshResponse = await request(app1)
+      .post(baseUrl + "/refresh-token")
+      .send({ refreshToken: newRefreshToken });
+    
+    expect(refreshResponse.statusCode).toBe(403);
+    expect(refreshResponse.body.message).toBe("Invalid refresh token");
+  });
+
+ });
+
 
 
 });
