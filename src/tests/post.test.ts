@@ -4,6 +4,7 @@ import initApp from "../server";
 import request from "supertest";
 import { IPost, Post } from "../models/postModel";
 import { User } from "../models/userModel";
+import { Comment } from '../models/commentModel';
 
 var app1: Express;
 
@@ -241,31 +242,53 @@ test("Get all posts with pagination", async () => {
     await User.deleteMany({ email: otherUser.email });
   });
   
-  // בדיקת מחיקת פוסט
-  test("Delete post - successful", async () => {
-    // יצירת פוסט חדש למחיקה
-    const createResponse = await request(app1)
-      .post(baseUrl)
+   // בדיקת מחיקת פוסט ותגובות
+ 
+test("Delete post should delete all associated comments", async () => {
+  // יצירת פוסט חדש לבדיקה
+  const postResponse = await request(app1)
+    .post(baseUrl)
+    .set("Authorization", `Bearer ${accessToken}`)
+    .send({ text: "פוסט לבדיקת מחיקת תגובות" });
+  
+  const testPostId = postResponse.body._id;
+  
+  // יצירת מספר תגובות לפוסט
+  const commentIds = [];
+  for (let i = 0; i < 3; i++) {
+    const commentResponse = await request(app1)
+      .post(`/comments/createComment/${testPostId}`)
       .set("Authorization", `Bearer ${accessToken}`)
-      .send({ text: "פוסט למחיקה" });
+      .send({ text: `תגובה ${i+1} לפוסט מחיקה` });
     
-    const deletePostId = createResponse.body._id;
-    
-    // מחיקת הפוסט
-    const deleteResponse = await request(app1)
-      .delete(`${baseUrl}/${deletePostId}`)
-      .set("Authorization", `Bearer ${accessToken}`);
-    
-    expect(deleteResponse.statusCode).toBe(200);
-    expect(deleteResponse.body).toHaveProperty("message");
-    
-    // בדיקה שהפוסט אכן נמחק
-    const getResponse = await request(app1)
-      .get(`${baseUrl}/${deletePostId}`)
-      .set("Authorization", `Bearer ${accessToken}`);
-    
-    expect(getResponse.statusCode).toBe(404);
-  });
+    commentIds.push(commentResponse.body._id);
+  }
+  
+  // וידוא שהתגובות נוצרו בהצלחה
+  const commentsBeforeDelete = await Comment.find({ post: testPostId });
+  expect(commentsBeforeDelete.length).toBe(commentIds.length);
+  
+  // מחיקת הפוסט
+  const deleteResponse = await request(app1)
+    .delete(`${baseUrl}/${testPostId}`)
+    .set("Authorization", `Bearer ${accessToken}`);
+  
+  expect(deleteResponse.statusCode).toBe(200);
+  
+  // בדיקה שהפוסט אכן נמחק
+  const deletedPost = await Post.findById(testPostId);
+  expect(deletedPost).toBeNull();
+  
+  // בדיקה שכל התגובות נמחקו גם כן
+  const commentsAfterDelete = await Comment.find({ post: testPostId });
+  expect(commentsAfterDelete.length).toBe(0);
+  
+  // בדיקה פרטנית שכל התגובות נמחקו
+  for (const commentId of commentIds) {
+    const comment = await Comment.findById(commentId);
+    expect(comment).toBeNull();
+  }
+});
   
   // בדיקת מחיקת פוסט - ללא הרשאה
   test("Delete post - unauthorized", async () => {
