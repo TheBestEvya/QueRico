@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/authRoute';
 import postRoutes from './routes/postRoute';
 import userRoutes from './routes/userRoute';
+import AIRoutes from './routes/AIRoutes';
 import commentRoutes from './routes/commentRoute';
 import swaggerJsDoc from "swagger-jsdoc";
 import swaggerUI from "swagger-ui-express";
@@ -39,6 +40,7 @@ app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);
 app.use('/users', userRoutes)
+app.use('/AI' , AIRoutes)
 
 app.use("*" , (req,res)=>{
   res.sendFile(path.resolve(__dirname , '..' , '../front/index.html'))
