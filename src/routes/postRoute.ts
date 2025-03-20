@@ -218,6 +218,7 @@ router.get('/', postController.getAllPosts);
  *                   type: string
  */
 router.get('/user/:userId', postController.getPostsByUser);
+
 router.get('/:postId', postController.getPostById);
 /**
  * @swagger

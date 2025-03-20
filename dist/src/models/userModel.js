@@ -73,8 +73,7 @@ const userSchema = new mongoose_1.Schema({
         minlength: 6
     },
     profileImage: {
-        type: String,
-        default: 'default.jpg'
+        type: String
     },
     googleId: {
         type: String,

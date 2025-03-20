@@ -18,7 +18,7 @@ const server = http.createServer(app); // Create HTTP server to handle socket.io
 
 // Middleware
 app.use(cors({
-  origin: [process.env.FRONTEND_URL || 'http://localhost:5173'],
+  origin: ["node102.cs.colman.ac.il",process.env.FRONTEND_URL || 'http://localhost:5173'],
   credentials: true,
 }));
 app.use(express.json());
@@ -30,12 +30,19 @@ app.use((req, res, next) => {
   next();
 });
 // Static files for images
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
+app.use(express.static(path.resolve(__dirname , '..' , '../front')))
+
+
 // Routes
 app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);
 app.use('/users', userRoutes)
+
+app.use("*" , (req,res)=>{
+  res.sendFile(path.resolve(__dirname , '..' , '../front/index.html'))
+})
 
 const options = {
   definition: {

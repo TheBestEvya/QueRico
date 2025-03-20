@@ -39,22 +39,8 @@ const getUserById = async (req: Request, res: Response):Promise<any> => {
 
 const updateProfile = async (req: userRequest, res: Response):Promise<any> => {
   try {
-    const { name, email , userId } = req.body;
-    
-    // בדיקה האם השם משתמש או האימייל כבר קיימים
-    const existingUser = await User.findOne({
-      $and: [
-        { _id: { $ne: userId } },
-        { $or: [{ name }, { email }] }
-      ]
-    });
-
-    if (existingUser) {
-      return res.status(400).json({
-        message: 'email already exists'
-      });
-    }
-
+    const { name, email   } = req.body;
+    const userId = req.userId;
     // עדכון פרטי המשתמש
     const updatedUser = await User.findByIdAndUpdate(
       userId,

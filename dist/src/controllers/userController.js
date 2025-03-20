@@ -45,19 +45,8 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, email, userId } = req.body;
-        // בדיקה האם השם משתמש או האימייל כבר קיימים
-        const existingUser = yield userModel_1.User.findOne({
-            $and: [
-                { _id: { $ne: userId } },
-                { $or: [{ name }, { email }] }
-            ]
-        });
-        if (existingUser) {
-            return res.status(400).json({
-                message: 'email already exists'
-            });
-        }
+        const { name, email } = req.body;
+        const userId = req.userId;
         // עדכון פרטי המשתמש
         const updatedUser = yield userModel_1.User.findByIdAndUpdate(userId, {
             $set: Object.assign({ name,

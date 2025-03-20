@@ -77,6 +77,7 @@ const googleSignIn = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.googleSignIn = googleSignIn;
 // רישום משתמש חדש
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const { name, email, password } = req.body;
         const existingUser = yield userModel_1.User.findOne({
@@ -96,6 +97,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const accessToken = (0, exports.generateAccessToken)(userId);
         const refreshToken = (0, exports.generateRefreshToken)(userId);
         yield userModel_1.User.findByIdAndUpdate(userId, { refreshToken });
+        console.log((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename, "this is profileimg");
         res.status(201).json({
             user: Object.assign({ id: userId, name: user.name, email: user.email }, (req.file && { profileImage: uploadPath + req.file.filename })),
             accessToken,
