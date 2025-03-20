@@ -14,12 +14,10 @@ const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const path_1 = __importDefault(require("path"));
 const http_1 = __importDefault(require("http"));
-// import { initializeSocket } from '../src/services/socketIO'; // Import socketService
 const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app); // Create HTTP server to handle socket.io
-// initializeSocket(server); // This will initialize the Socket.io functionality
 // Middleware
 app.use((0, cors_1.default)({
     origin: [process.env.FRONTEND_URL || 'http://localhost:5173'],
@@ -33,14 +31,17 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Methods", "*");
     next();
 });
-// app.use(passport.initialize());
 // Static files for images
-app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../public/uploads')));
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../../public/uploads')));
+app.use(express_1.default.static(path_1.default.resolve(__dirname, '..', '../front')));
 // Routes
 app.use('/auth', authRoute_1.default);
 app.use('/posts', postRoute_1.default);
 app.use('/comments', commentRoute_1.default);
 app.use('/users', userRoute_1.default);
+app.use("*", (req, res) => {
+    res.sendFile(path_1.default.resolve(__dirname, '..', '../front/index.html'));
+});
 const options = {
     definition: {
         openapi: "3.0.0",

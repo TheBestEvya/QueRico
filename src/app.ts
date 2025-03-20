@@ -3,7 +3,7 @@ import { initializeSocket } from '../src/services/socketIO'; // Import socketSer
 import https from "https"
 import fs from "fs"
 
-const port = process.env.PORT;
+const port = Number(process.env.PORT); // Convert port to a number
 
 initApp().then(({app , server}) => {
   if(process.env.NODE_ENV !== "production"){
@@ -18,7 +18,7 @@ initApp().then(({app , server}) => {
   }
   const httpsServer = https.createServer(prop,app)
   initializeSocket(httpsServer)
-  httpsServer.listen(port, () => {
+  httpsServer.listen(port , '0.0.0.0',   () => {
     console.log(`QueRico app listening at https://localhost:${port}`);
   });
 }

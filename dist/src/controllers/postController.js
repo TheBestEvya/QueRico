@@ -187,10 +187,10 @@ const getPostsByUser = (req, res) => __awaiter(void 0, void 0, void 0, function*
             }
         });
         const totalPosts = yield postModel_1.Post.countDocuments({ author: userId });
-        if (posts.length === 0) {
-            res.status(404).json({ message: 'No posts found for this user' });
-            return;
-        }
+        // if (posts.length === 0) {
+        //   res.status(404).json({ message: 'No posts found for this user' });
+        //   return;
+        // }
         // Send paginated response
         res.status(200).json({
             posts,

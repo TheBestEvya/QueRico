@@ -37,8 +37,7 @@ const userSchema = new Schema<IUser>({
     minlength: 6
   },
   profileImage: {
-    type: String,
-    default: 'default.jpg'
+    type: String
   },
   googleId: {
     type: String,

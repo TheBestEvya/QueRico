@@ -111,7 +111,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
       const refreshToken = generateRefreshToken(userId);
 
       await User.findByIdAndUpdate(userId, { refreshToken });
-
+      console.log(req.file?.filename , "this is profileimg")
       res.status(201).json({
         user: {
           id: userId,
