@@ -241,34 +241,8 @@ test("Get all posts with pagination", async () => {
     // ניקוי - מחיקת המשתמש הנוסף
     await User.deleteMany({ email: otherUser.email });
   });
-  
-  // בדיקת מחיקת פוסט
-  test("Delete post - successful", async () => {
-    // יצירת פוסט חדש למחיקה
-    const createResponse = await request(app1)
-      .post(baseUrl)
-      .set("Authorization", `Bearer ${accessToken}`)
-      .send({ text: "פוסט למחיקה" });
-    
-    const deletePostId = createResponse.body._id;
-    
-    // מחיקת הפוסט
-    const deleteResponse = await request(app1)
-      .delete(`${baseUrl}/${deletePostId}`)
-      .set("Authorization", `Bearer ${accessToken}`);
-    
-    expect(deleteResponse.statusCode).toBe(200);
-    expect(deleteResponse.body).toHaveProperty("message");
-    
-    // בדיקה שהפוסט אכן נמחק
-    const getResponse = await request(app1)
-      .get(`${baseUrl}/${deletePostId}`)
-      .set("Authorization", `Bearer ${accessToken}`);
-    
-    expect(getResponse.statusCode).toBe(404);
-  });
-
-  // הוסף את הבדיקה הזו בתוך ה-describe של "Post Tests"
+ // בדיקת מחיקת פוסט ותגובות
+ 
 test("Delete post should delete all associated comments", async () => {
   // יצירת פוסט חדש לבדיקה
   const postResponse = await request(app1)
