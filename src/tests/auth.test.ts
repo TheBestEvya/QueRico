@@ -131,12 +131,80 @@ test("Auth test login - response structure", async () => {
   expect(response.body.user).toHaveProperty('id');
   expect(response.body.user).toHaveProperty('name');
   expect(response.body.user).toHaveProperty('email');
-  expect(response.body.user).toHaveProperty('profileImage');
   expect(response.body).toHaveProperty('accessToken');
   expect(response.body).toHaveProperty('refreshToken');
   
   // בדיקת תוכן הנתונים
   expect(response.body.user.email).toBe(testUser.email);
+});
+
+// בדיקת רישום עם העלאת תמונת פרופיל
+test("Auth test register - with profile image", async () => {
+  // יצירת קובץ תמונה פשוט לבדיקה
+  const fs = require('fs');
+  const path = require('path');
+  const tempImagePath = path.join(__dirname, 'test-profile-image.jpg');
+  
+  // יצירת קובץ בינארי קטן שנראה כמו תמונת JPEG
+  const minimalJpegBuffer = Buffer.from([
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
+    0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43,
+    0x00, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x00, 0x01, 0x00, 0x01, 0x03, 0x01,
+    0x22, 0x00, 0xff, 0xc4, 0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x01, 0x3f, 0x10
+  ]);
+  fs.writeFileSync(tempImagePath, minimalJpegBuffer);
+  
+  try {
+    // משתמש עם תמונת פרופיל
+    const userWithImage = {
+      name: "User With Image",
+      email: "image-user@test.com",
+      password: "imagepassword"
+    };
+    
+    // שליחת הבקשה עם תמונה
+    const response = await request(app1)
+      .post(baseUrl + "/register")
+      .field("name", userWithImage.name)
+      .field("email", userWithImage.email)
+      .field("password", userWithImage.password)
+      .attach("profileImage", tempImagePath);
+    
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toHaveProperty('user');
+    expect(response.body.user).toHaveProperty('profileImage');
+    expect(response.body.user.profileImage).toBeTruthy();
+    expect(typeof response.body.user.profileImage).toBe('string');
+    expect(response.body.user.profileImage.length).toBeGreaterThan(0);
+    
+    // בדיקה שהתמונה נשמרה במסד הנתונים
+    const userId = response.body.user.id;
+    const user = await userModel.findById(userId);
+    expect(user).not.toBeNull();
+    expect(user?.profileImage).toBeDefined();
+    expect(user?.profileImage).toBe(response.body.user.profileImage);
+    
+    // התחברות עם המשתמש החדש ובדיקה שמקבלים את תמונת הפרופיל
+    const loginResponse = await request(app1).post(baseUrl + "/login").send({
+      email: userWithImage.email,
+      password: userWithImage.password
+    });
+    
+    expect(loginResponse.statusCode).toBe(200);
+    expect(loginResponse.body.user).toHaveProperty('profileImage');
+    expect(loginResponse.body.user.profileImage).toBe(user?.profileImage);
+    
+    // ניקוי הקובץ הזמני
+    fs.unlinkSync(tempImagePath);
+  } catch (error) {
+    // ניקוי הקובץ הזמני במקרה של שגיאה
+    if (fs.existsSync(tempImagePath)) {
+      fs.unlinkSync(tempImagePath);
+    }
+    throw error;
+  }
 });
 
 // בדיקה שהרפרש טוקן מתעדכן במסד הנתונים
