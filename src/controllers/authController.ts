@@ -153,7 +153,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
           id: userId,
           name: user.name,
           email: user.email,
-          profileImage: user.profileImage
+          profileImage: user.profileImage || '' // תמיד מחזיר ערך, גם אם ריק
         },
         accessToken,
         refreshToken
