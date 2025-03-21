@@ -39,6 +39,7 @@
     "testAuth": "jest --detectOpenHandles --forceExit auth.test.ts",
     "testPost": "jest --detectOpenHandles --forceExit post.test.ts",
     "testComment": "jest --detectOpenHandles --forceExit comment.test.ts",
+    "testUser": "jest --detectOpenHandles --forceExit user.test.ts",
     "start": "ts-node src/app.ts",
     "test": "jest --detectOpenHandles --coverage --forceExit"
   }
