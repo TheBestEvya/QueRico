@@ -88,46 +88,52 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
-  // רישום משתמש חדש
-  const register=async  (req: RegisterRequest, res: Response):Promise<any>=> {
-    try {
-      const { name, email, password } = req.body;
-      const existingUser = await User.findOne({ 
-        $or: [{ email }] 
-      });
+ // רישום משתמש חדש
+const register = async (req: RegisterRequest, res: Response): Promise<any> => {
+  try {
+    const { name, email, password } = req.body;
+    const existingUser = await User.findOne({ 
+      $or: [{ email }] 
+    });
 
-      if (existingUser) {
-        return res.status(400).json({ 
-          message: 'email already exists' 
-        });
-      }
-      
-      const user = await User.create({
-        name,
-        email,
-        password
+    if (existingUser) {
+      return res.status(400).json({ 
+        message: 'email already exists' 
       });
-      const userId = user._id.toString();
-      const accessToken = generateAccessToken(userId);
-      const refreshToken = generateRefreshToken(userId);
-
-      await User.findByIdAndUpdate(userId, { refreshToken });
-      console.log(req.file?.filename , "this is profileimg")
-      res.status(201).json({
-        user: {
-          id: userId,
-          name: user.name,
-          email: user.email,
-          ...(req.file && { profileImage: uploadPath+req.file.filename })
-        },
-        accessToken,
-        refreshToken
-      });
-    } catch (error) {
-      console.log(error)
-      res.status(500).json({ message: 'Error creating user', error });
     }
+    
+    // יצירת המשתמש הבסיסי
+    const user = await User.create({
+      name,
+      email,
+      password
+    });
+    const userId = user._id.toString();
+    const accessToken = generateAccessToken(userId);
+    const refreshToken = generateRefreshToken(userId);
+
+    // עדכון הrefresh token ותמונת הפרופיל במסד הנתונים בפעולה אחת
+    await User.findByIdAndUpdate(userId, { 
+      refreshToken,
+      ...(req.file && { profileImage: uploadPath + req.file.filename })
+    });
+
+    console.log(req.file?.filename, "this is profileimg");
+    res.status(201).json({
+      user: {
+        id: userId,
+        name: user.name,
+        email: user.email,
+        ...(req.file && { profileImage: uploadPath + req.file.filename }),
+      },
+      accessToken,
+      refreshToken
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error creating user', error });
   }
+};
   // התחברות
   const login = async (req: LoginRequest, res: Response):Promise<any> => {
     try {
@@ -153,7 +159,7 @@ export const googleSignIn = async (req: Request, res: Response):Promise<any> => 
           id: userId,
           name: user.name,
           email: user.email,
-          profileImage: user.profileImage || '' // תמיד מחזיר ערך, גם אם ריק
+          profileImage: user.profileImage
         },
         accessToken,
         refreshToken
