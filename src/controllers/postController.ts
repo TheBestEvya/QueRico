@@ -73,7 +73,6 @@ interface toggleLikeRequest extends Request {
 
   // קבלת כל הפוסטים עם paging
   const getAllPosts = async(req: GetPostsRequest, res: Response)=> {
-    console.log("All posts - Page ", req.query.page)
     try {
       const page = parseInt(req.query.page || '1');
       const limit = parseInt(req.query.limit || '10');
@@ -173,7 +172,6 @@ interface toggleLikeRequest extends Request {
 
       // מחיקת כל התגובות לפוסט
       await Comment.deleteMany({ post: postId });
-      //TODO :: delete photo of the post
       await post.deleteOne();
 
      return res.status(200).json({ message: 'Post deleted successfully' });
@@ -261,7 +259,6 @@ interface toggleLikeRequest extends Request {
   const getPostLikes=async(req: Request<{ postId: string }>, res: Response):Promise<any> => {
     try {
       const { postId } = req.params;
-      //TODO :: check of the username and profileImage is for users
       const post = await Post.findById(postId)
         .populate('likes', 'name profileImage');
 
