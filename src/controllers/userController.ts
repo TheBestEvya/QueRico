@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { User } from '../models/userModel';
 import { Post } from '../models/postModel';
 import env from 'dotenv';
+import { Comment } from '../models/commentModel';
 env.config();
 const uploadPath = process.env.UPLOAD_PATH;
 interface userRequest extends Request {
@@ -94,8 +95,7 @@ const getUserPosts = async (req: Request, res: Response):Promise<any> => {
     res.status(500).json({ message: 'Error fetching user posts', error });
   }
 };
-
-const deleteProfile = async (req: userRequest, res: Response):Promise<any> => {
+const deleteProfile = async (req: userRequest, res: Response): Promise<any> => {
   try {
     const userId = req.userId; // Get the authenticated user's ID
 
@@ -106,17 +106,27 @@ const deleteProfile = async (req: userRequest, res: Response):Promise<any> => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Delete all posts related to the user
+    // מחיקת כל התגובות שנכתבו על ידי המשתמש
+    await Comment.deleteMany({ author: userId });
+
+    // מציאת כל הפוסטים של המשתמש לפני מחיקתם (כדי שנוכל למחוק את התגובות עליהם)
+    const userPosts = await Post.find({ author: userId });
+    const userPostIds = userPosts.map(post => post._id);
+
+    // מחיקת כל התגובות על הפוסטים של המשתמש
+    await Comment.deleteMany({ post: { $in: userPostIds } });
+
+    // מחיקת כל הפוסטים של המשתמש
     await Post.deleteMany({ author: userId });
 
-    // Delete the user
+    // מחיקת המשתמש עצמו
     const deletedUser = await User.findByIdAndDelete(userId);
 
     if (!deletedUser) {
       return res.status(404).json({ message: 'Error deleting user profile' });
     }
 
-    res.status(200).json({ message: 'User profile and related posts deleted successfully' });
+    res.status(200).json({ message: 'User profile and related content deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting profile', error });
   }
