@@ -26,7 +26,6 @@ const getChatResponse = async (req: Request, res: Response):Promise<any> => {
       {
         model: model,
         messages: messages,
-        max_tokens: 2, 
         temperature: 0.7,
       },
       {

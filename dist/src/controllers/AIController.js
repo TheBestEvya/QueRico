@@ -33,7 +33,6 @@ const getChatResponse = (req, res) => __awaiter(void 0, void 0, void 0, function
         const response = yield axios_1.default.post(OpenAIURL, {
             model: model,
             messages: messages,
-            max_tokens: 2,
             temperature: 0.7,
         }, {
             headers: {

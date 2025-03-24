@@ -39,9 +39,6 @@ export const initializeSocket = (server: Server) => {
       if (userSockets[receiverId]) {
         io.to(userSockets[receiverId]).emit('newMessage', { senderId, message , timestamp});
       }
-
-      // Emit the message back to the sender (optional, for immediate chat experience)
-      // socket.emit('newMessage', { senderId, message , timestamp });
     });
 
     // Fetch chat history when a user opens the chat with another user
