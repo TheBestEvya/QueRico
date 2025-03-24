@@ -41,7 +41,7 @@ export const initializeSocket = (server: Server) => {
       }
 
       // Emit the message back to the sender (optional, for immediate chat experience)
-      socket.emit('newMessage', { senderId, message , timestamp });
+      // socket.emit('newMessage', { senderId, message , timestamp });
     });
 
     // Fetch chat history when a user opens the chat with another user

@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const userModel_1 = require("../models/userModel");
 const postModel_1 = require("../models/postModel");
 const dotenv_1 = __importDefault(require("dotenv"));
+const commentModel_1 = require("../models/commentModel");
 dotenv_1.default.config();
 const uploadPath = process.env.UPLOAD_PATH;
 const getProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -97,14 +98,21 @@ const deleteProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        // Delete all posts related to the user
+        // מחיקת כל התגובות שנכתבו על ידי המשתמש
+        yield commentModel_1.Comment.deleteMany({ author: userId });
+        // מציאת כל הפוסטים של המשתמש לפני מחיקתם (כדי שנוכל למחוק את התגובות עליהם)
+        const userPosts = yield postModel_1.Post.find({ author: userId });
+        const userPostIds = userPosts.map(post => post._id);
+        // מחיקת כל התגובות על הפוסטים של המשתמש
+        yield commentModel_1.Comment.deleteMany({ post: { $in: userPostIds } });
+        // מחיקת כל הפוסטים של המשתמש
         yield postModel_1.Post.deleteMany({ author: userId });
-        // Delete the user
+        // מחיקת המשתמש עצמו
         const deletedUser = yield userModel_1.User.findByIdAndDelete(userId);
         if (!deletedUser) {
             return res.status(404).json({ message: 'Error deleting user profile' });
         }
-        res.status(200).json({ message: 'User profile and related posts deleted successfully' });
+        res.status(200).json({ message: 'User profile and related content deleted successfully' });
     }
     catch (error) {
         res.status(500).json({ message: 'Error deleting profile', error });

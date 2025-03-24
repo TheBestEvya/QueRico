@@ -9,6 +9,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const authRoute_1 = __importDefault(require("./routes/authRoute"));
 const postRoute_1 = __importDefault(require("./routes/postRoute"));
 const userRoute_1 = __importDefault(require("./routes/userRoute"));
+const AIRoutes_1 = __importDefault(require("./routes/AIRoutes"));
 const commentRoute_1 = __importDefault(require("./routes/commentRoute"));
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
@@ -20,7 +21,7 @@ const app = (0, express_1.default)();
 const server = http_1.default.createServer(app); // Create HTTP server to handle socket.io
 // Middleware
 app.use((0, cors_1.default)({
-    origin: [process.env.FRONTEND_URL || 'http://localhost:5173'],
+    origin: ["node102.cs.colman.ac.il", process.env.FRONTEND_URL || 'http://localhost:5173'],
     credentials: true,
 }));
 app.use(express_1.default.json());
@@ -39,9 +40,7 @@ app.use('/auth', authRoute_1.default);
 app.use('/posts', postRoute_1.default);
 app.use('/comments', commentRoute_1.default);
 app.use('/users', userRoute_1.default);
-app.use("*", (req, res) => {
-    res.sendFile(path_1.default.resolve(__dirname, '..', '../front/index.html'));
-});
+app.use('/AI', AIRoutes_1.default);
 const options = {
     definition: {
         openapi: "3.0.0",
@@ -50,12 +49,15 @@ const options = {
             version: "1.0.0",
             description: "REST server including authentication using JWT",
         },
-        servers: [{ url: "http://localhost:3001", }, { url: process.env.DOMAIN_URL }],
+        servers: [{ url: "https://10.10.246.102", }, { url: process.env.DOMAIN_URL }],
     },
     apis: ["./src/routes/*.ts"],
 };
 const specs = (0, swagger_jsdoc_1.default)(options);
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(specs));
+app.use("*", (req, res) => {
+    res.sendFile(path_1.default.resolve(__dirname, '..', '../front/index.html'));
+});
 // Connect to MongoDB
 const db = mongoose_1.default.connection;
 db.on("error", (error) => console.error(error));

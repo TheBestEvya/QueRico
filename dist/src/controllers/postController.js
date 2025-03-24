@@ -43,7 +43,6 @@ const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 // קבלת כל הפוסטים עם paging
 const getAllPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("All posts - Page ", req.query.page);
     try {
         const page = parseInt(req.query.page || '1');
         const limit = parseInt(req.query.limit || '10');
@@ -128,7 +127,6 @@ const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         // מחיקת כל התגובות לפוסט
         yield commentModel_1.Comment.deleteMany({ post: postId });
-        //TODO :: delete photo of the post
         yield post.deleteOne();
         return res.status(200).json({ message: 'Post deleted successfully' });
     }
@@ -208,7 +206,6 @@ const getPostsByUser = (req, res) => __awaiter(void 0, void 0, void 0, function*
 const getPostLikes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { postId } = req.params;
-        //TODO :: check of the username and profileImage is for users
         const post = yield postModel_1.Post.findById(postId)
             .populate('likes', 'name profileImage');
         if (!post) {

@@ -88,6 +88,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 message: 'email already exists'
             });
         }
+        // יצירת המשתמש הבסיסי
         const user = yield userModel_1.User.create({
             name,
             email,
@@ -96,7 +97,8 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const userId = user._id.toString();
         const accessToken = (0, exports.generateAccessToken)(userId);
         const refreshToken = (0, exports.generateRefreshToken)(userId);
-        yield userModel_1.User.findByIdAndUpdate(userId, { refreshToken });
+        // עדכון הrefresh token ותמונת הפרופיל במסד הנתונים בפעולה אחת
+        yield userModel_1.User.findByIdAndUpdate(userId, Object.assign({ refreshToken }, (req.file && { profileImage: uploadPath + req.file.filename })));
         console.log((_a = req.file) === null || _a === void 0 ? void 0 : _a.filename, "this is profileimg");
         res.status(201).json({
             user: Object.assign({ id: userId, name: user.name, email: user.email }, (req.file && { profileImage: uploadPath + req.file.filename })),
@@ -176,6 +178,28 @@ const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { refreshToken } = req.body;
         yield userModel_1.User.findOneAndUpdate({ refreshToken }, { $unset: { refreshToken: 1 } });
+        // בקובץ authController.ts או דומה
+        try {
+            // מניחים שהמשתמש כבר אומת ו-req.user מכיל את המידע על המשתמש הנוכחי
+            const userId = req.userId;
+            if (!userId) {
+                return res.status(401).json({ message: "User not authenticated" });
+            }
+            // עדכון המשתמש על ידי מחיקת הרפרש טוקן מהמסד נתונים
+            const userM = yield userModel_1.User.findById(userId);
+            if (!userM) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            // מחיקת הרפרש טוקן על ידי קביעתו לערך ריק
+            userM.refreshToken = "";
+            yield userM.save();
+            // מוחזרת תשובה מוצלחת
+            return res.status(200).json({ message: "Successfully logged out" });
+        }
+        catch (error) {
+            console.error("Logout error:", error);
+            return res.status(500).json({ message: "Error logging out" });
+        }
         res.status(200).json({ message: 'Successfully logged out' });
     }
     catch (error) {

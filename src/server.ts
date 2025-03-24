@@ -34,17 +34,12 @@ app.use((req, res, next) => {
 app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
 app.use(express.static(path.resolve(__dirname , '..' , '../front')))
 
-
 // Routes
 app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);
 app.use('/users', userRoutes)
 app.use('/AI' , AIRoutes)
-
-app.use("*" , (req,res)=>{
-  res.sendFile(path.resolve(__dirname , '..' , '../front/index.html'))
-})
 
 const options = {
   definition: {
@@ -54,13 +49,16 @@ const options = {
       version: "1.0.0",
       description: "REST server including authentication using JWT",
     },
-    servers: [{ url: "http://localhost:3001", },{url : process.env.DOMAIN_URL}],
+    servers: [{ url: "https://10.10.246.102", },{url : process.env.DOMAIN_URL}],
   },
   apis: ["./src/routes/*.ts"],
 };
 const specs = swaggerJsDoc(options);
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
+app.use("*" , (req,res)=>{
+  res.sendFile(path.resolve(__dirname , '..' , '../front/index.html'))
+})
 // Connect to MongoDB
 
 const db = mongoose.connection;
