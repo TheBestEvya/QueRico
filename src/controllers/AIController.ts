@@ -19,8 +19,9 @@ const getChatResponse = async (req: Request, res: Response):Promise<any> => {
     const messages = [
       systemPrompt,
       ...(history || []), // Preserve past messages for contextual responses
-      { role: "user", content:  (location)? `The user is in lng -${location.lng} lat -${location.lat}\n` + message: message }, // Current user input
+      { role: "user", content:  (location)? `The user is in lng ${location.lng} lat ${location.lat} ` + message: message }, // Current user input
     ];
+    console.log(messages)
     const response = await axios.post(
       OpenAIURL,
       {

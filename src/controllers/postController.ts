@@ -140,11 +140,14 @@ interface toggleLikeRequest extends Request {
       }
 
       const updateData: any = { text };
-      if (req.file) {
-        updateData.image =uploadPath + req.file.filename;
-      }else{
-        updateData.image = null;
+      if(!post.image){
+        if (req.file) {
+          updateData.image =uploadPath + req.file.filename;
+        }else{
+          updateData.image = null;
+        }
       }
+      
 
       const updatedPost = await Post.findByIdAndUpdate(
         postId,

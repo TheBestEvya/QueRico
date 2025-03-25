@@ -103,11 +103,13 @@ const updatePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             return res.status(404).json({ message: 'Post not found or unauthorized' });
         }
         const updateData = { text };
-        if (req.file) {
-            updateData.image = uploadPath + req.file.filename;
-        }
-        else {
-            updateData.image = null;
+        if (!post.image) {
+            if (req.file) {
+                updateData.image = uploadPath + req.file.filename;
+            }
+            else {
+                updateData.image = null;
+            }
         }
         const updatedPost = yield postModel_1.Post.findByIdAndUpdate(postId, { $set: updateData }, { new: true }).populate('author', 'name profileImage');
         res.status(203).json(updatedPost);
